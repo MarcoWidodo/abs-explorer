@@ -702,8 +702,8 @@ function SingleVariableExplorer() {
         {loading ? (
           <ChartSkeleton height="h-[300px] md:h-[500px] lg:h-[700px]" />
         ) : formattedChartData.length > 0 ? (
-          <div ref={chartContainerRef}>
-            <ResponsiveContainer width="100%" height={700} className="h-[300px] md:h-[500px] lg:h-[700px]">
+          <div ref={chartContainerRef} className="h-[300px] md:h-[500px] lg:h-[700px]">
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={formattedChartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
@@ -785,7 +785,7 @@ function SingleVariableExplorer() {
                       <td className="font-medium">{row.response}</td>
                       {selectedCountryNames.map(name => (
                         <td key={name}>
-                          {row[name] !== undefined ? `${row[name].toFixed(1)}%` : '—'}
+                          {row[name] !== undefined ? `${row[name].toFixed(1)}%` : '\u2014'}
                         </td>
                       ))}
                     </tr>
@@ -844,7 +844,7 @@ function SingleVariableExplorer() {
                         <td className="font-medium">{row.response}</td>
                         {selectedCountryNames.map(name => (
                           <td key={name}>
-                            {row[name] !== undefined ? row[name].toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                            {row[name] !== undefined ? row[name].toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u2014'}
                           </td>
                         ))}
                     ))}
