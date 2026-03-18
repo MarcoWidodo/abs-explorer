@@ -2,14 +2,13 @@
  * SkeletonLoaders.jsx
  * Reusable skeleton loading components for perceived performance improvement
  * File location: src/components/SkeletonLoaders.jsx
+ * 
+ * Note: Uses Tailwind dark: variant instead of React context to avoid
+ * circular dependencies with App.jsx
  */
-
-import { useTheme } from '../App'
 
 // Chart skeleton - mimics a bar/line chart loading state
 export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }) {
-  const { darkMode } = useTheme()
-  
   return (
     <div className={`${height} w-full flex flex-col`} role="status" aria-label="Loading chart">
       {/* Y-axis area */}
@@ -18,7 +17,7 @@ export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }
           {[...Array(5)].map((_, i) => (
             <div 
               key={i} 
-              className={`h-3 w-8 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+              className="h-3 w-8 rounded animate-pulse bg-earth-200 dark:bg-dark-700"
               style={{ animationDelay: `${i * 100}ms` }}
             />
           ))}
@@ -29,7 +28,7 @@ export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }
           {[...Array(8)].map((_, i) => (
             <div 
               key={i} 
-              className={`flex-1 rounded-t animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+              className="flex-1 rounded-t animate-pulse bg-earth-200 dark:bg-dark-700"
               style={{ 
                 height: `${30 + Math.random() * 60}%`,
                 animationDelay: `${i * 75}ms`
@@ -44,7 +43,7 @@ export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }
         {[...Array(8)].map((_, i) => (
           <div 
             key={i} 
-            className={`flex-1 h-3 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+            className="flex-1 h-3 rounded animate-pulse bg-earth-200 dark:bg-dark-700"
             style={{ animationDelay: `${i * 75}ms` }}
           />
         ))}
@@ -54,8 +53,8 @@ export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }
       <div className="flex justify-center gap-4 mt-4">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded animate-pulse ${darkMode ? 'bg-dark-600' : 'bg-earth-300'}`} />
-            <div className={`w-16 h-3 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`} />
+            <div className="w-3 h-3 rounded animate-pulse bg-earth-300 dark:bg-dark-600" />
+            <div className="w-16 h-3 rounded animate-pulse bg-earth-200 dark:bg-dark-700" />
           </div>
         ))}
       </div>
@@ -67,12 +66,10 @@ export function ChartSkeleton({ height = 'h-[300px] md:h-[500px] lg:h-[600px]' }
 
 // Map skeleton - mimics a choropleth map loading
 export function MapSkeleton({ height = 'h-[300px] md:h-[400px] lg:h-[450px]' }) {
-  const { darkMode } = useTheme()
-  
   return (
     <div className={`${height} w-full relative overflow-hidden rounded-xl`} role="status" aria-label="Loading map">
       {/* Map background */}
-      <div className={`absolute inset-0 animate-pulse ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`} />
+      <div className="absolute inset-0 animate-pulse bg-earth-100 dark:bg-dark-800" />
       
       {/* Fake country shapes */}
       <svg viewBox="0 0 400 300" className="absolute inset-0 w-full h-full">
@@ -93,16 +90,16 @@ export function MapSkeleton({ height = 'h-[300px] md:h-[400px] lg:h-[450px]' }) 
             width={rect.w}
             height={rect.h}
             rx="4"
-            className={`animate-pulse ${darkMode ? 'fill-dark-700' : 'fill-earth-200'}`}
+            className="animate-pulse fill-earth-200 dark:fill-dark-700"
             style={{ animationDelay: `${i * 100}ms` }}
           />
         ))}
       </svg>
       
       {/* Legend skeleton */}
-      <div className={`absolute bottom-4 right-4 p-3 rounded-lg ${darkMode ? 'bg-dark-900/90' : 'bg-white/90'}`}>
-        <div className={`w-20 h-3 mb-2 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`} />
-        <div className={`w-24 h-3 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`} />
+      <div className="absolute bottom-4 right-4 p-3 rounded-lg bg-white/90 dark:bg-dark-900/90">
+        <div className="w-20 h-3 mb-2 rounded animate-pulse bg-earth-200 dark:bg-dark-700" />
+        <div className="w-24 h-3 rounded animate-pulse bg-earth-200 dark:bg-dark-700" />
       </div>
       
       <span className="sr-only">Loading map data...</span>
@@ -112,16 +109,14 @@ export function MapSkeleton({ height = 'h-[300px] md:h-[400px] lg:h-[450px]' }) 
 
 // Table skeleton - mimics a data table loading
 export function TableSkeleton({ rows = 5, columns = 4 }) {
-  const { darkMode } = useTheme()
-  
   return (
     <div className="w-full" role="status" aria-label="Loading table">
       {/* Header */}
-      <div className={`flex gap-4 p-4 border-b ${darkMode ? 'border-dark-700 bg-dark-800' : 'border-earth-200 bg-earth-50'}`}>
+      <div className="flex gap-4 p-4 border-b border-earth-200 dark:border-dark-700 bg-earth-50 dark:bg-dark-800">
         {[...Array(columns)].map((_, i) => (
           <div 
             key={i} 
-            className={`h-4 rounded animate-pulse ${darkMode ? 'bg-dark-600' : 'bg-earth-300'}`}
+            className="h-4 rounded animate-pulse bg-earth-300 dark:bg-dark-600"
             style={{ width: `${60 + Math.random() * 40}px` }}
           />
         ))}
@@ -131,12 +126,12 @@ export function TableSkeleton({ rows = 5, columns = 4 }) {
       {[...Array(rows)].map((_, rowIdx) => (
         <div 
           key={rowIdx} 
-          className={`flex gap-4 p-4 border-b ${darkMode ? 'border-dark-800' : 'border-earth-100'}`}
+          className="flex gap-4 p-4 border-b border-earth-100 dark:border-dark-800"
         >
           {[...Array(columns)].map((_, colIdx) => (
             <div 
               key={colIdx} 
-              className={`h-3 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+              className="h-3 rounded animate-pulse bg-earth-200 dark:bg-dark-700"
               style={{ 
                 width: `${40 + Math.random() * 60}px`,
                 animationDelay: `${(rowIdx * columns + colIdx) * 50}ms`
@@ -153,29 +148,27 @@ export function TableSkeleton({ rows = 5, columns = 4 }) {
 
 // Card grid skeleton - for homepage or dashboard cards
 export function CardGridSkeleton({ count = 4 }) {
-  const { darkMode } = useTheme()
-  
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4" role="status" aria-label="Loading content">
       {[...Array(count)].map((_, i) => (
         <div 
           key={i} 
-          className={`p-6 rounded-2xl border ${darkMode ? 'bg-dark-900 border-dark-800' : 'bg-white border-earth-100'}`}
+          className="p-6 rounded-2xl border bg-white dark:bg-dark-900 border-earth-100 dark:border-dark-800"
         >
           <div 
-            className={`w-12 h-12 rounded-xl mb-4 animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+            className="w-12 h-12 rounded-xl mb-4 animate-pulse bg-earth-200 dark:bg-dark-700"
             style={{ animationDelay: `${i * 100}ms` }}
           />
           <div 
-            className={`h-5 w-3/4 rounded mb-2 animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+            className="h-5 w-3/4 rounded mb-2 animate-pulse bg-earth-200 dark:bg-dark-700"
             style={{ animationDelay: `${i * 100 + 50}ms` }}
           />
           <div 
-            className={`h-3 w-full rounded mb-1 animate-pulse ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`}
+            className="h-3 w-full rounded mb-1 animate-pulse bg-earth-100 dark:bg-dark-800"
             style={{ animationDelay: `${i * 100 + 100}ms` }}
           />
           <div 
-            className={`h-3 w-2/3 rounded animate-pulse ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`}
+            className="h-3 w-2/3 rounded animate-pulse bg-earth-100 dark:bg-dark-800"
             style={{ animationDelay: `${i * 100 + 150}ms` }}
           />
         </div>
@@ -188,8 +181,6 @@ export function CardGridSkeleton({ count = 4 }) {
 
 // Scatter plot skeleton
 export function ScatterSkeleton({ height = 'h-[300px] md:h-[450px] lg:h-[600px]' }) {
-  const { darkMode } = useTheme()
-  
   return (
     <div className={`${height} w-full flex`} role="status" aria-label="Loading scatter plot">
       {/* Y-axis */}
@@ -197,7 +188,7 @@ export function ScatterSkeleton({ height = 'h-[300px] md:h-[450px] lg:h-[600px]'
         {[...Array(5)].map((_, i) => (
           <div 
             key={i} 
-            className={`h-3 w-8 rounded animate-pulse ${darkMode ? 'bg-dark-700' : 'bg-earth-200'}`}
+            className="h-3 w-8 rounded animate-pulse bg-earth-200 dark:bg-dark-700"
           />
         ))}
       </div>
@@ -207,7 +198,7 @@ export function ScatterSkeleton({ height = 'h-[300px] md:h-[450px] lg:h-[600px]'
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className={`absolute w-3 h-3 rounded-full animate-pulse ${darkMode ? 'bg-dark-600' : 'bg-earth-300'}`}
+            className="absolute w-3 h-3 rounded-full animate-pulse bg-earth-300 dark:bg-dark-600"
             style={{
               left: `${10 + Math.random() * 80}%`,
               top: `${10 + Math.random() * 80}%`,

@@ -1,11 +1,14 @@
-import { useState, useEffect, createContext, useContext, useCallback, useRef } from 'react'
+import { useState, useEffect, createContext, useContext, useCallback, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom'
 import { Sun, Moon, BarChart3, ScatterChart, Home, Menu, X, TrendingUp, Map } from 'lucide-react'
-import SingleVariableExplorer from './pages/SingleVariableExplorer'
-import CorrelationsExplorer from './pages/CorrelationsExplorer'
-import TimeSeriesExplorer from './pages/TimeSeriesExplorer'
-import MapExplorer from './pages/MapExplorer'
-import HomePage from './pages/HomePage'
+import { ChartSkeleton, MapSkeleton, ScatterSkeleton, CardGridSkeleton } from './components/SkeletonLoaders'
+
+// Lazy-loaded page components - each becomes its own chunk
+const HomePage = lazy(() => import('./pages/HomePage'))
+const SingleVariableExplorer = lazy(() => import('./pages/SingleVariableExplorer'))
+const CorrelationsExplorer = lazy(() => import('./pages/CorrelationsExplorer'))
+const TimeSeriesExplorer = lazy(() => import('./pages/TimeSeriesExplorer'))
+const MapExplorer = lazy(() => import('./pages/MapExplorer'))
 
 // Theme context
 const ThemeContext = createContext()
@@ -14,6 +17,107 @@ export const useTheme = () => useContext(ThemeContext)
 // Data context
 const DataContext = createContext()
 export const useData = () => useContext(DataContext)
+
+// Route-specific loading fallbacks
+function HomePageFallback() {
+  return (
+    <div className="animate-fade-in space-y-8">
+      {/* Hero skeleton */}
+      <div className="text-center py-8">
+        <div className="h-10 w-96 mx-auto rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-4" />
+        <div className="h-5 w-64 mx-auto rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+      </div>
+      {/* Stats cards skeleton */}
+      <CardGridSkeleton count={4} />
+      {/* Map skeleton */}
+      <div className="card p-6">
+        <div className="h-6 w-48 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-4" />
+        <MapSkeleton height="h-[300px] md:h-[400px]" />
+      </div>
+    </div>
+  )
+}
+
+function ChartPageFallback({ title }) {
+  return (
+    <div className="animate-fade-in space-y-6">
+      {/* Header skeleton */}
+      <div>
+        <div className="h-8 w-64 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+        <div className="h-4 w-96 rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+      </div>
+      {/* Controls card skeleton */}
+      <div className="card p-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+              <div className="h-10 w-full rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Chart skeleton */}
+      <div className="card p-6">
+        <ChartSkeleton height="h-[300px] md:h-[500px] lg:h-[600px]" />
+      </div>
+    </div>
+  )
+}
+
+function ScatterPageFallback() {
+  return (
+    <div className="animate-fade-in space-y-6">
+      {/* Header skeleton */}
+      <div>
+        <div className="h-8 w-64 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+        <div className="h-4 w-96 rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+      </div>
+      {/* Controls card skeleton */}
+      <div className="card p-6">
+        <div className="grid md:grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+              <div className="h-10 w-full rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Scatter plot skeleton */}
+      <div className="card p-6">
+        <ScatterSkeleton height="h-[300px] md:h-[450px] lg:h-[600px]" />
+      </div>
+    </div>
+  )
+}
+
+function MapPageFallback() {
+  return (
+    <div className="animate-fade-in space-y-6">
+      {/* Header skeleton */}
+      <div>
+        <div className="h-8 w-48 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+        <div className="h-4 w-80 rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+      </div>
+      {/* Controls card skeleton */}
+      <div className="card p-6">
+        <div className="grid md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 rounded bg-earth-200 dark:bg-dark-700 animate-pulse mb-2" />
+              <div className="h-10 w-full rounded bg-earth-100 dark:bg-dark-800 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Map skeleton */}
+      <div className="card p-6">
+        <MapSkeleton height="h-[300px] md:h-[400px] lg:h-[500px]" />
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -167,6 +271,7 @@ function App() {
                   <button
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     className="md:hidden p-2.5 rounded-lg bg-earth-100 dark:bg-dark-800 text-earth-600 dark:text-dark-400"
+                    aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                   >
                     {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                   </button>
@@ -207,11 +312,46 @@ function App() {
               </div>
             ) : (
               <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/single-variable" element={<SingleVariableExplorer />} />
-                <Route path="/correlations" element={<CorrelationsExplorer />} />
-                <Route path="/time-series" element={<TimeSeriesExplorer />} />
-                <Route path="/map" element={<MapExplorer />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <Suspense fallback={<HomePageFallback />}>
+                      <HomePage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/single-variable" 
+                  element={
+                    <Suspense fallback={<ChartPageFallback title="Single Variable Explorer" />}>
+                      <SingleVariableExplorer />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/correlations" 
+                  element={
+                    <Suspense fallback={<ScatterPageFallback />}>
+                      <CorrelationsExplorer />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/time-series" 
+                  element={
+                    <Suspense fallback={<ChartPageFallback title="Time Series Explorer" />}>
+                      <TimeSeriesExplorer />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/map" 
+                  element={
+                    <Suspense fallback={<MapPageFallback />}>
+                      <MapExplorer />
+                    </Suspense>
+                  } 
+                />
               </Routes>
             )}
           </main>
