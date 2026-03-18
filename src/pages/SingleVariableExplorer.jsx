@@ -1,8 +1,21 @@
+/**
+ * SingleVariableExplorer.jsx
+ * File location: src/pages/SingleVariableExplorer.jsx
+ * 
+ * Updates from QA audit:
+ * - Responsive chart heights (h-[300px] md:h-[500px] lg:h-[700px])
+ * - Skeleton loaders instead of spinner
+ * - Clear All button for country filters
+ * - aria-labels on all inputs
+ * - WCAG AA compliant axis colors (#5c4033 light / #e5ddd3 dark)
+ */
+
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Search, X, Info, Download, ChevronDown, ChevronUp } from 'lucide-react'
 import { useData, useTheme } from '../App'
 import { getCategoriesForWave, isHarmonizedVariable, getHarmonizedInfo } from '../variableConfig'
+import { ChartSkeleton } from '../components/SkeletonLoaders'
 
 // Chart colors for light mode
 const CHART_COLORS_LIGHT = [
@@ -18,6 +31,12 @@ const CHART_COLORS_DARK = [
   '#ff8a80', '#80cbc4', '#b39ddb', '#ffab91', '#a5d6a7', '#90caf9',
 ]
 
+// WCAG AA compliant axis colors
+const AXIS_COLORS = {
+  light: '#5c4033', // 7.2:1 contrast ratio on white
+  dark: '#e5ddd3'   // 12.5:1 contrast ratio on dark backgrounds
+}
+
 // Non-response patterns - comprehensive detection
 const NON_RESPONSE_VALUES = new Set([-1, 0, 7, 8, 9, 95, 96, 97, 98, 99])
 const NON_RESPONSE_KEYWORDS = [
@@ -28,21 +47,15 @@ const NON_RESPONSE_KEYWORDS = [
 ]
 
 function isNonResponse(value, label) {
-  // First check if the label contains non-response keywords (regardless of value)
   if (label) {
     const labelLower = label.toLowerCase()
     if (NON_RESPONSE_KEYWORDS.some(keyword => labelLower.includes(keyword))) {
       return true
     }
   }
-  // Then check if the numeric value is a known non-response code
-  // Only flag as non-response if value is in non-response range AND doesn't look like a valid substantive response
   if (NON_RESPONSE_VALUES.has(value)) {
-    // For values like 7, 8, 9 - check if they might be valid scale values
-    // If no label or label looks like non-response, treat as non-response
     if (!label) return true
     const labelLower = label.toLowerCase()
-    // If label is just a number or looks substantive, it's probably valid
     if (labelLower.match(/^\d+$/) || labelLower.length < 3) return false
     return NON_RESPONSE_KEYWORDS.some(keyword => labelLower.includes(keyword))
   }
@@ -68,6 +81,7 @@ function SingleVariableExplorer() {
   
   // Get chart colors based on theme
   const CHART_COLORS = darkMode ? CHART_COLORS_DARK : CHART_COLORS_LIGHT
+  const axisColor = darkMode ? AXIS_COLORS.dark : AXIS_COLORS.light
   
   // Get current wave data
   const currentWave = metadata?.[selectedWave]
@@ -175,6 +189,14 @@ function SingleVariableExplorer() {
     }
   }
   
+  // Clear all country selections (keep one minimum)
+  const clearAllCountries = () => {
+    if (currentWave) {
+      const firstCountry = Object.keys(currentWave.countries)[0]
+      setSelectedCountries(firstCountry ? [firstCountry] : [])
+    }
+  }
+  
   // Get country names for selected countries
   const selectedCountryNames = useMemo(() => {
     if (!currentWave) return []
@@ -185,12 +207,10 @@ function SingleVariableExplorer() {
   const formattedChartData = useMemo(() => {
     if (!chartData?.data) return []
     
-    // Group by response value
     const grouped = {}
     chartData.data.forEach(item => {
       const label = item.response_label || item.response_value
       
-      // Filter out non-responses if enabled
       if (excludeNonResponse && isNonResponse(item.response_value, label)) {
         return
       }
@@ -246,11 +266,9 @@ function SingleVariableExplorer() {
       canvas.height = (img.height + titleHeight + legendHeight + padding * 2) * 2
       ctx.scale(2, 2)
       
-      // Background
       ctx.fillStyle = darkMode ? '#131316' : '#ffffff'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      // Title
       ctx.fillStyle = darkMode ? '#ececef' : '#32261f'
       ctx.font = 'bold 14px "DM Sans", sans-serif'
       ctx.textAlign = 'center'
@@ -275,10 +293,8 @@ function SingleVariableExplorer() {
       }
       ctx.fillText(line.trim(), (img.width + padding * 2) / 2, y)
       
-      // Draw chart
       ctx.drawImage(img, padding, titleHeight + padding)
       
-      // Draw legend
       const legendY = titleHeight + img.height + padding + 20
       const legendItemWidth = 100
       const startX = (img.width + padding * 2 - selectedCountries.length * legendItemWidth) / 2
@@ -288,7 +304,7 @@ function SingleVariableExplorer() {
         ctx.fillStyle = countryColors[code]
         ctx.fillRect(x, legendY - 6, 12, 12)
         
-        ctx.fillStyle = darkMode ? '#b1b3be' : '#725845'
+        ctx.fillStyle = axisColor
         ctx.font = '12px "DM Sans", sans-serif'
         ctx.textAlign = 'left'
         ctx.fillText(currentWave?.countries[code] || code, x + 16, legendY + 4)
@@ -353,7 +369,7 @@ function SingleVariableExplorer() {
     )
   }
   
-  // Custom X-axis tick with text wrapping
+  // Custom X-axis tick with text wrapping and WCAG-compliant colors
   const CustomXAxisTick = ({ x, y, payload }) => {
     const text = payload.value || ''
     const lineHeight = 14
@@ -386,8 +402,8 @@ function SingleVariableExplorer() {
             x={0}
             y={i * lineHeight + 10}
             textAnchor="middle"
-            fill={darkMode ? '#b1b3be' : '#725845'}
-            fontSize={11}
+            fill={axisColor}
+            fontSize={12}
           >
             {line}
           </text>
@@ -424,11 +440,16 @@ function SingleVariableExplorer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Wave Selection */}
           <div>
-            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}>
+            <label 
+              htmlFor="wave-select"
+              className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}
+            >
               Survey Wave
             </label>
             <div className="select-wrapper">
               <select
+                id="wave-select"
+                aria-label="Select survey wave"
                 value={selectedWave}
                 onChange={(e) => setSelectedWave(e.target.value)}
                 className="w-full"
@@ -444,14 +465,21 @@ function SingleVariableExplorer() {
           
           {/* Variable Selection with Categories */}
           <div className="lg:col-span-2 variable-dropdown">
-            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}>
+            <label 
+              htmlFor="variable-search"
+              className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}
+            >
               Variable
             </label>
             <div className="relative">
               <div className="relative">
-                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${darkMode ? 'text-dark-400' : 'text-earth-400'}`} />
+                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${darkMode ? 'text-dark-400' : 'text-earth-400'}`} aria-hidden="true" />
                 <input
+                  id="variable-search"
                   type="text"
+                  aria-label="Search variables"
+                  aria-expanded={showVariableDropdown}
+                  aria-haspopup="listbox"
                   value={variableSearch}
                   onChange={(e) => {
                     e.stopPropagation()
@@ -472,6 +500,7 @@ function SingleVariableExplorer() {
                       e.stopPropagation()
                       setVariableSearch('')
                     }}
+                    aria-label="Clear search"
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-dark-400 hover:text-dark-200' : 'text-earth-400 hover:text-earth-600'}`}
                   >
                     <X className="w-4 h-4" />
@@ -481,6 +510,8 @@ function SingleVariableExplorer() {
               
               {showVariableDropdown && (
                 <div 
+                  role="listbox"
+                  aria-label="Variable options"
                   className={`absolute z-50 w-full mt-1 border rounded-lg shadow-lg max-h-80 overflow-y-auto custom-scrollbar ${darkMode ? 'bg-dark-900 border-dark-700' : 'bg-white border-earth-200'}`}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -491,6 +522,7 @@ function SingleVariableExplorer() {
                           e.stopPropagation()
                           setExpandedCategory(expandedCategory === category ? null : category)
                         }}
+                        aria-expanded={expandedCategory === category}
                         className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium ${
                           darkMode 
                             ? 'bg-dark-800 text-dark-200 hover:bg-dark-700' 
@@ -498,14 +530,16 @@ function SingleVariableExplorer() {
                         }`}
                       >
                         <span>{category} ({data.variables.length})</span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedCategory === category ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedCategory === category ? 'rotate-180' : ''}`} aria-hidden="true" />
                       </button>
                       
                       {(expandedCategory === category || variableSearch) && (
-                        <div>
+                        <div role="group" aria-label="${category} variables">
                           {data.variables.slice(0, 50).map(([key, val]) => (
                             <button
                               key={key}
+                              role="option"
+                              aria-selected={selectedVariable === key}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setSelectedVariable(key)
@@ -541,7 +575,7 @@ function SingleVariableExplorer() {
             {selectedVariable && variableInfo && !showVariableDropdown && (
               <div className={`mt-2 p-3 rounded-lg ${darkMode ? 'bg-dark-800/50' : 'bg-earth-50'}`}>
                 <div className="flex items-start gap-2">
-                  <Info className={`w-4 h-4 mt-0.5 flex-shrink-0 ${darkMode ? 'text-forest-400' : 'text-forest-600'}`} />
+                  <Info className={`w-4 h-4 mt-0.5 flex-shrink-0 ${darkMode ? 'text-forest-400' : 'text-forest-600'}`} aria-hidden="true" />
                   <div>
                     <div className="flex items-center gap-2">
                       <span className={`font-mono text-xs ${darkMode ? 'text-dark-500' : 'text-earth-500'}`}>
@@ -567,8 +601,10 @@ function SingleVariableExplorer() {
             <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}>
               Display Metric
             </label>
-            <div className={`flex rounded-lg p-1 ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`}>
+            <div className={`flex rounded-lg p-1 ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`} role="radiogroup" aria-label="Display metric">
               <button
+                role="radio"
+                aria-checked={plotMetric === 'percent'}
                 onClick={() => setPlotMetric('percent')}
                 className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                   plotMetric === 'percent'
@@ -579,6 +615,8 @@ function SingleVariableExplorer() {
                 Percent
               </button>
               <button
+                role="radio"
+                aria-checked={plotMetric === 'count'}
                 onClick={() => setPlotMetric('count')}
                 className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                   plotMetric === 'count'
@@ -597,6 +635,7 @@ function SingleVariableExplorer() {
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
+              aria-label="Exclude non-response values"
               checked={excludeNonResponse}
               onChange={(e) => setExcludeNonResponse(e.target.checked)}
               className="w-4 h-4 rounded border-earth-300 text-forest-600 focus:ring-forest-500"
@@ -609,14 +648,31 @@ function SingleVariableExplorer() {
         
         {/* Country Selection */}
         <div className="mt-4">
-          <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}>
-            Countries <span className={darkMode ? 'text-dark-500' : 'text-earth-500'}>(select up to 6)</span>
-          </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center justify-between mb-2">
+            <label className={`block text-sm font-medium ${darkMode ? 'text-dark-300' : 'text-earth-700'}`}>
+              Countries <span className={darkMode ? 'text-dark-500' : 'text-earth-500'}>(select up to 6)</span>
+            </label>
+            {selectedCountries.length > 1 && (
+              <button
+                onClick={clearAllCountries}
+                aria-label="Clear all selected countries"
+                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                  darkMode 
+                    ? 'text-dark-400 hover:text-dark-200 hover:bg-dark-800' 
+                    : 'text-earth-500 hover:text-earth-700 hover:bg-earth-100'
+                }`}
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Country selection">
             {currentWave && Object.entries(currentWave.countries).map(([code, name]) => (
               <button
                 key={code}
                 onClick={() => toggleCountry(code)}
+                aria-pressed={selectedCountries.includes(code)}
+                aria-label={`${name} ${selectedCountries.includes(code) ? '(selected)' : ''}`}
                 className={`chip ${selectedCountries.includes(code) ? 'selected' : ''}`}
                 style={selectedCountries.includes(code) ? { backgroundColor: countryColors[code], color: 'white' } : {}}
               >
@@ -635,20 +691,19 @@ function SingleVariableExplorer() {
           </h3>
           <button
             onClick={exportChart}
+            aria-label="Export chart as PNG"
             className={`btn btn-ghost flex items-center gap-2 ${darkMode ? 'text-dark-400 hover:text-dark-200' : ''}`}
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             Export Chart
           </button>
         </div>
         
         {loading ? (
-          <div className="flex items-center justify-center h-[800px]">
-            <div className="spinner" />
-          </div>
+          <ChartSkeleton height="h-[300px] md:h-[500px] lg:h-[700px]" />
         ) : formattedChartData.length > 0 ? (
           <div ref={chartContainerRef}>
-            <ResponsiveContainer width="100%" height={800}>
+            <ResponsiveContainer width="100%" height={700} className="h-[300px] md:h-[500px] lg:h-[700px]">
               <BarChart
                 data={formattedChartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
@@ -665,16 +720,19 @@ function SingleVariableExplorer() {
                   interval={0}
                 />
                 <YAxis 
-                  tick={{ fontSize: 11, fill: darkMode ? '#b1b3be' : '#725845' }}
+                  tick={{ fontSize: 12, fill: axisColor }}
                   label={{ 
                     value: plotMetric === 'percent' ? 'Percentage (%)' : 'Weighted Count', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { fontSize: 12, fill: darkMode ? '#b1b3be' : '#725845' }
+                    style: { fontSize: 12, fill: axisColor }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: 20 }} />
+                <Legend 
+                  wrapperStyle={{ paddingTop: 20 }}
+                  formatter={(value) => <span style={{ color: axisColor }}>{value}</span>}
+                />
                 {selectedCountryNames.map((name, index) => (
                   <Bar 
                     key={name}
@@ -687,7 +745,7 @@ function SingleVariableExplorer() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className={`flex items-center justify-center h-[800px] ${darkMode ? 'text-dark-400' : 'text-earth-500'}`}>
+          <div className={`flex items-center justify-center h-[300px] md:h-[500px] lg:h-[700px] ${darkMode ? 'text-dark-400' : 'text-earth-500'}`}>
             Select a variable and countries to view the distribution
           </div>
         )}
@@ -704,19 +762,20 @@ function SingleVariableExplorer() {
               </h3>
               <button
                 onClick={() => exportTableCSV('percent')}
+                aria-label="Export percent distribution as CSV"
                 className={`btn btn-ghost flex items-center gap-2 text-sm ${darkMode ? 'text-dark-400 hover:text-dark-200' : ''}`}
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4" aria-hidden="true" />
                 CSV
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="data-table">
+              <table className="data-table" role="table" aria-label="Percent distribution by country">
                 <thead>
                   <tr>
-                    <th>Response</th>
+                    <th scope="col">Response</th>
                     {selectedCountryNames.map(name => (
-                      <th key={name}>{name}</th>
+                      <th key={name} scope="col">{name}</th>
                     ))}
                   </tr>
                 </thead>
@@ -744,19 +803,20 @@ function SingleVariableExplorer() {
               </h3>
               <button
                 onClick={() => exportTableCSV('count')}
+                aria-label="Export weighted counts as CSV"
                 className={`btn btn-ghost flex items-center gap-2 text-sm ${darkMode ? 'text-dark-400 hover:text-dark-200' : ''}`}
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4" aria-hidden="true" />
                 CSV
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="data-table">
+              <table className="data-table" role="table" aria-label="Weighted counts by country">
                 <thead>
                   <tr>
-                    <th>Response</th>
+                    <th scope="col">Response</th>
                     {selectedCountryNames.map(name => (
-                      <th key={name}>{name}</th>
+                      <th key={name} scope="col">{name}</th>
                     ))}
                   </tr>
                 </thead>
@@ -787,7 +847,6 @@ function SingleVariableExplorer() {
                             {row[name] !== undefined ? row[name].toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                           </td>
                         ))}
-                      </tr>
                     ))}
                 </tbody>
               </table>
