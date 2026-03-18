@@ -33,8 +33,8 @@ const CHART_COLORS_DARK = [
 
 // WCAG AA compliant axis colors
 const AXIS_COLORS = {
-  light: '#5c4033', // 7.2:1 contrast ratio on white
-  dark: '#e5ddd3'   // 12.5:1 contrast ratio on dark backgrounds
+  light: '#5c4033',
+  dark: '#e5ddd3'
 }
 
 // Non-response patterns - comprehensive detection
@@ -534,7 +534,7 @@ function SingleVariableExplorer() {
                       </button>
                       
                       {(expandedCategory === category || variableSearch) && (
-                        <div role="group" aria-label="${category} variables">
+                        <div role="group" aria-label={`${category} variables`}>
                           {data.variables.slice(0, 50).map(([key, val]) => (
                             <button
                               key={key}
@@ -785,7 +785,7 @@ function SingleVariableExplorer() {
                       <td className="font-medium">{row.response}</td>
                       {selectedCountryNames.map(name => (
                         <td key={name}>
-                          {row[name] !== undefined ? `${row[name].toFixed(1)}%` : '\u2014'}
+                          {row[name] !== undefined ? `${row[name].toFixed(1)}%` : '-'}
                         </td>
                       ))}
                     </tr>
@@ -844,9 +844,10 @@ function SingleVariableExplorer() {
                         <td className="font-medium">{row.response}</td>
                         {selectedCountryNames.map(name => (
                           <td key={name}>
-                            {row[name] !== undefined ? row[name].toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u2014'}
+                            {row[name] !== undefined ? row[name].toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}
                           </td>
                         ))}
+                      </tr>
                     ))}
                 </tbody>
               </table>
