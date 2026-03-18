@@ -33,7 +33,6 @@ export default defineConfig({
           'vendor-maps': [
             'react-simple-maps',
             'topojson-client',
-            'world-atlas',
           ],
           // D3 utilities used across visualizations
           'vendor-d3': [
