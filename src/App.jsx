@@ -345,6 +345,14 @@ function App() {
                   } 
                 />
                 <Route 
+                  path="/time-series-explorer" 
+                  element={
+                    <Suspense fallback={<ChartPageFallback title="Time Series Explorer" />}>
+                      <TimeSeriesExplorer />
+                    </Suspense>
+                  } 
+                />
+                <Route 
                   path="/map" 
                   element={
                     <Suspense fallback={<MapPageFallback />}>
