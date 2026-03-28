@@ -1,485 +1,482 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Info, Download, TrendingUp, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
-import { useData, useTheme } from '../App'
-import { HARMONIZED_VARIABLES, getAllHarmonizedVariables } from '../variableConfig'
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  Legend, ResponsiveContainer
+} from 'recharts';
 
-const CHART_COLORS_LIGHT = ['#537963', '#8b6b50', '#e26d47', '#687891', '#9fb9a9', '#c2ab85', '#cf5431', '#354d40']
-const CHART_COLORS_DARK = ['#6fcf97', '#f2c94c', '#f2994a', '#56ccf2', '#bb6bd9', '#eb5757', '#27ae60', '#9b51e0']
+const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
-function TimeSeriesExplorer() {
-  const { metadata, loadDistribution } = useData()
-  const { darkMode } = useTheme()
-  const chartContainerRef = useRef(null)
-  
-  const CHART_COLORS = darkMode ? CHART_COLORS_DARK : CHART_COLORS_LIGHT
-  
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedHarmonized, setSelectedHarmonized] = useState('')
-  const [selectedCountries, setSelectedCountries] = useState([])
-  const [timeSeriesData, setTimeSeriesData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [showVariableDetails, setShowVariableDetails] = useState(false)
-  const [visualizationType, setVisualizationType] = useState('mean')
-  const [selectedResponseValue, setSelectedResponseValue] = useState(1)
-  
-  const harmonizedVariables = getAllHarmonizedVariables()
-  
-  // Group by category
-  const groupedVars = useMemo(() => {
-    const groups = {}
-    harmonizedVariables.forEach(hv => {
-      const cat = hv.category || 'Other'
-      if (!groups[cat]) groups[cat] = []
-      groups[cat].push(hv)
-    })
-    return groups
-  }, [harmonizedVariables])
-  
-  const categories = Object.keys(groupedVars).sort()
-  const variablesInCategory = useMemo(() => groupedVars[selectedCategory] || [], [selectedCategory, groupedVars])
-  
-  // Set defaults
-  useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) setSelectedCategory(categories[0])
-  }, [categories])
-  
-  useEffect(() => {
-    if (variablesInCategory.length > 0) {
-      const current = variablesInCategory.find(v => v.id === selectedHarmonized)
-      if (!current) setSelectedHarmonized(variablesInCategory[0].id)
-    }
-  }, [variablesInCategory, selectedHarmonized])
-  
-  const selectedVarInfo = useMemo(() => harmonizedVariables.find(v => v.id === selectedHarmonized), [selectedHarmonized])
-  
-  // Available countries
-  const availableCountries = useMemo(() => {
-    if (!metadata || !selectedVarInfo) return {}
-    const wavesWithVar = Object.keys(selectedVarInfo.waves)
-    const countryPresence = {}
-    wavesWithVar.forEach(waveKey => {
-      const waveData = metadata[waveKey]
-      if (!waveData) return
-      for (const [code, name] of Object.entries(waveData.countries || {})) {
-        if (!countryPresence[code]) countryPresence[code] = { name, count: 0 }
-        countryPresence[code].count++
-      }
-    })
-    const minWaves = Math.ceil(wavesWithVar.length / 2)
-    const filtered = {}
-    for (const [code, data] of Object.entries(countryPresence)) {
-      if (data.count >= minWaves) filtered[code] = data.name
-    }
-    return filtered
-  }, [metadata, selectedVarInfo])
-  
-  useEffect(() => {
-    if (Object.keys(availableCountries).length > 0 && selectedCountries.length === 0) {
-      setSelectedCountries(Object.keys(availableCountries).slice(0, 4))
-    }
-  }, [availableCountries])
-  
-  useEffect(() => {
-    if (Object.keys(availableCountries).length > 0) {
-      const valid = selectedCountries.filter(c => availableCountries[c])
-      if (valid.length === 0) setSelectedCountries(Object.keys(availableCountries).slice(0, 4))
-      else if (valid.length !== selectedCountries.length) setSelectedCountries(valid)
-    }
-  }, [selectedHarmonized, availableCountries])
-  
-  // Wave details with full variable info
-  const waveDetails = useMemo(() => {
-    if (!selectedVarInfo || !metadata) return {}
-    const details = {}
-    for (const [waveKey, mapping] of Object.entries(selectedVarInfo.waves)) {
-      const waveData = metadata[waveKey]
-      if (!waveData) continue
-      const varInfo = waveData.variables[mapping.var]
-      details[waveKey] = {
-        waveNum: parseInt(waveKey.replace('wave', '')),
-        varName: mapping.var,
-        label: varInfo?.label || mapping.var,
-        valueLabels: varInfo?.value_labels || {},
-        reversed: mapping.reversed || false,
-        scale: mapping.scale || [1, 5]
-      }
-    }
-    return details
-  }, [selectedVarInfo, metadata])
-  
-  // Response options
-  const responseOptions = useMemo(() => {
-    if (!Object.keys(waveDetails).length) return []
-    const firstWave = Object.values(waveDetails)[0]
-    if (!firstWave?.valueLabels) return []
-    const scale = firstWave.scale || [1, 5]
-    const options = []
-    for (let i = scale[0]; i <= scale[1]; i++) {
-      const label = firstWave.valueLabels[i] || firstWave.valueLabels[String(i)] || `Value ${i}`
-      if (i >= 7 || i < 0) continue
-      options.push({ value: i, label })
-    }
-    return options
-  }, [waveDetails])
-  
-  const countryColors = useMemo(() => {
-    const colors = {}
-    Object.keys(availableCountries).forEach((code, i) => {
-      colors[code] = CHART_COLORS[i % CHART_COLORS.length]
-    })
-    return colors
-  }, [availableCountries, CHART_COLORS])
-  
-  const toggleCountry = (code) => {
-    if (selectedCountries.includes(code)) {
-      if (selectedCountries.length > 1) setSelectedCountries(selectedCountries.filter(c => c !== code))
-    } else if (selectedCountries.length < 8) {
-      setSelectedCountries([...selectedCountries, code])
-    }
-  }
-  
-  // Fetch data
-  useEffect(() => {
-    if (!selectedHarmonized || selectedCountries.length === 0 || !selectedVarInfo || !loadDistribution) return
-    
-    setLoading(true)
-    const promises = Object.entries(selectedVarInfo.waves).map(async ([waveKey, mapping]) => {
-      const waveNum = parseInt(waveKey.replace('wave', ''))
-      try {
-        const data = await loadDistribution(waveKey, mapping.var, selectedCountries)
-        return { waveKey, waveNum, data, mapping }
-      } catch (err) {
-        return { waveKey, waveNum, data: null, mapping }
-      }
-    })
-    
-    Promise.all(promises).then(results => {
-      const seriesData = {}
-      results.forEach(({ waveKey, waveNum, data, mapping }) => {
-        if (!data) return
-        
-        const countryMeans = {}
-        const countryProps = {}
-        const countryCounts = {}
-        
-        for (const [countryCode, responses] of Object.entries(data)) {
-          const code = countryCode.toString()
-          if (!selectedCountries.includes(code)) continue
-          
-          let totalWeight = 0
-          let weightedSum = 0
-          const dist = {}
-          
-          for (const [respValue, count] of Object.entries(responses)) {
-            const numResp = parseInt(respValue)
-            if (numResp < 0 || numResp >= 7) continue
-            
-            const weight = count.weighted || count
-            totalWeight += weight
-            
-            let value = numResp
-            if (mapping.reversed) {
-              const scale = mapping.scale || [1, 5]
-              value = scale[1] + scale[0] - numResp
-            }
-            weightedSum += value * weight
-            dist[numResp] = (dist[numResp] || 0) + weight
-          }
-          
-          if (totalWeight > 0) {
-            countryMeans[code] = weightedSum / totalWeight
-            countryProps[code] = {}
-            for (const [rv, cnt] of Object.entries(dist)) {
-              countryProps[code][rv] = (cnt / totalWeight) * 100
-            }
-            countryCounts[code] = totalWeight
-          }
-        }
-        
-        seriesData[waveKey] = { waveNum, means: countryMeans, proportions: countryProps, totals: countryCounts }
-      })
-      
-      setTimeSeriesData(seriesData)
-      setLoading(false)
-    })
-  }, [selectedHarmonized, selectedCountries, selectedVarInfo, loadDistribution])
-  
-  // Chart data
-  const chartData = useMemo(() => {
-    if (!timeSeriesData) return []
-    return Object.entries(timeSeriesData)
-      .sort((a, b) => a[1].waveNum - b[1].waveNum)
-      .map(([waveKey, waveData]) => {
-        const point = { wave: `W${waveData.waveNum}`, waveNum: waveData.waveNum }
-        selectedCountries.forEach(code => {
-          const name = availableCountries[code] || code
-          if (visualizationType === 'mean') {
-            if (waveData.means[code] !== undefined) point[name] = parseFloat(waveData.means[code].toFixed(2))
-          } else {
-            if (waveData.proportions[code]?.[selectedResponseValue] !== undefined) {
-              point[name] = parseFloat(waveData.proportions[code][selectedResponseValue].toFixed(1))
-            }
-          }
-        })
-        return point
-      })
-  }, [timeSeriesData, selectedCountries, availableCountries, visualizationType, selectedResponseValue])
-  
-  const yAxisConfig = useMemo(() => {
-    if (visualizationType === 'mean') {
-      const scale = selectedVarInfo?.waves ? Object.values(selectedVarInfo.waves)[0]?.scale || [1, 5] : [1, 5]
-      return { domain: scale, ticks: Array.from({length: scale[1] - scale[0] + 1}, (_, i) => scale[0] + i) }
-    }
-    return { domain: [0, 100], ticks: [0, 25, 50, 75, 100] }
-  }, [visualizationType, selectedVarInfo])
-  
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null
-    return (
-      <div className={`p-3 rounded-lg shadow-lg border ${darkMode ? 'bg-dark-800 border-dark-700' : 'bg-white border-earth-200'}`}>
-        <p className={`font-medium mb-2 ${darkMode ? 'text-dark-100' : 'text-earth-900'}`}>{label}</p>
-        {payload.map((entry, i) => (
-          <div key={i} className="flex items-center justify-between gap-4 text-sm">
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.stroke }} />
-              <span className={darkMode ? 'text-dark-400' : 'text-earth-600'}>{entry.name}</span>
-            </span>
-            <span className={`font-medium ${darkMode ? 'text-dark-100' : 'text-earth-900'}`}>
-              {visualizationType === 'mean' ? entry.value?.toFixed(2) : `${entry.value?.toFixed(1)}%`}
+// Country colors (consistent palette)
+const COUNTRY_COLORS = {
+  Japan: '#E63946', 'Hong Kong': '#457B9D', 'South Korea': '#1D3557',
+  China: '#E9C46A', Mongolia: '#2A9D8F', Philippines: '#264653',
+  Taiwan: '#F4A261', Thailand: '#6A0572', Indonesia: '#118AB2',
+  Singapore: '#06D6A0', Vietnam: '#EF476F', Cambodia: '#FFD166',
+  Malaysia: '#073B4C', Myanmar: '#8338EC', Australia: '#3A86A7',
+  India: '#FB5607'
+};
+
+const WAVE_LABELS = {
+  W1: '2001–03', W2: '2005–08', W3: '2010–12', W4: '2014–16', W5: '2018–20'
+};
+
+// Custom tooltip
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 max-w-xs">
+      <p className="font-semibold text-sm mb-1 text-gray-800 dark:text-gray-200">
+        {label} ({WAVE_LABELS[label] || label})
+      </p>
+      {payload
+        .filter(p => p.value != null)
+        .sort((a, b) => b.value - a.value)
+        .map((p, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+            <span className="text-gray-600 dark:text-gray-400 truncate">{p.name}</span>
+            <span className="ml-auto font-mono font-semibold text-gray-800 dark:text-gray-200">
+              {p.value.toFixed(2)}
             </span>
           </div>
         ))}
-      </div>
-    )
-  }
-  
+    </div>
+  );
+}
+
+export default function TimeSeriesExplorer() {
+  const [metadata, setMetadata] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [selectedVariable, setSelectedVariable] = useState('');
+  const [selectedCountries, setSelectedCountries] = useState([]);
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showTable, setShowTable] = useState(false);
+
+  // Load metadata (variable list)
+  useEffect(() => {
+    fetch(`${API_BASE}/api/timeseries`)
+      .then(r => r.json())
+      .then(data => {
+        setMetadata(data);
+        setLoading(false);
+        // Default: select first category
+        if (data.categories?.length > 0) {
+          setSelectedCategory(data.categories[0].name);
+        }
+      })
+      .catch(e => { setError(e.message); setLoading(false); });
+  }, []);
+
+  // Derived: categories
+  const categories = useMemo(() => {
+    if (!metadata) return [];
+    return metadata.categories || [];
+  }, [metadata]);
+
+  // Derived: subcategories for selected category
+  const subcategories = useMemo(() => {
+    if (!selectedCategory || !metadata) return [];
+    const cat = categories.find(c => c.name === selectedCategory);
+    return cat?.subcategories || [];
+  }, [selectedCategory, categories, metadata]);
+
+  // Derived: filtered variables
+  const filteredVariables = useMemo(() => {
+    if (!metadata) return [];
+    return metadata.variables.filter(v => {
+      if (selectedCategory && v.category !== selectedCategory) return false;
+      if (selectedSubcategory && v.subcategory !== selectedSubcategory) return false;
+      return true;
+    });
+  }, [metadata, selectedCategory, selectedSubcategory]);
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    setSelectedSubcategory('');
+    setSelectedVariable('');
+    setChartData(null);
+  }, [selectedCategory]);
+
+  // Reset variable when subcategory changes
+  useEffect(() => {
+    setSelectedVariable('');
+    setChartData(null);
+  }, [selectedSubcategory]);
+
+  // Auto-select first variable when filter changes
+  useEffect(() => {
+    if (filteredVariables.length > 0 && !selectedVariable) {
+      setSelectedVariable(filteredVariables[0].id);
+    }
+  }, [filteredVariables]);
+
+  // Fetch data when variable changes
+  useEffect(() => {
+    if (!selectedVariable) return;
+    setDataLoading(true);
+    const params = new URLSearchParams({ variableId: selectedVariable });
+    if (selectedCountries.length > 0) {
+      params.set('countries', selectedCountries.join(','));
+    }
+    fetch(`${API_BASE}/api/timeseries?${params}`)
+      .then(r => r.json())
+      .then(data => {
+        setChartData(data);
+        setDataLoading(false);
+        // Default: select all countries if none selected
+        if (selectedCountries.length === 0 && data.lineData) {
+          setSelectedCountries(data.lineData.map(d => d.countryCode));
+        }
+      })
+      .catch(e => { setError(e.message); setDataLoading(false); });
+  }, [selectedVariable]);
+
+  // Refetch when country selection changes (but only if we have data)
+  const refetchWithCountries = useCallback((countries) => {
+    if (!selectedVariable) return;
+    setDataLoading(true);
+    const params = new URLSearchParams({ variableId: selectedVariable });
+    if (countries.length > 0) {
+      params.set('countries', countries.join(','));
+    }
+    fetch(`${API_BASE}/api/timeseries?${params}`)
+      .then(r => r.json())
+      .then(data => { setChartData(data); setDataLoading(false); })
+      .catch(e => { setError(e.message); setDataLoading(false); });
+  }, [selectedVariable]);
+
+  const toggleCountry = (code) => {
+    setSelectedCountries(prev => {
+      const next = prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code];
+      refetchWithCountries(next);
+      return next;
+    });
+  };
+
+  const selectAllCountries = () => {
+    if (!chartData) return;
+    const all = chartData.lineData.map(d => d.countryCode);
+    setSelectedCountries(all);
+    refetchWithCountries(all);
+  };
+
+  const clearCountries = () => {
+    setSelectedCountries([]);
+  };
+
+  // Current variable info
+  const currentVar = useMemo(() => {
+    if (!metadata || !selectedVariable) return null;
+    return metadata.variables.find(v => v.id === selectedVariable);
+  }, [metadata, selectedVariable]);
+
+  // Chart data formatted for Recharts
+  const rechartsData = useMemo(() => {
+    if (!chartData?.lineData) return [];
+    const waves = chartData.variable.waves;
+    return waves.map(wave => {
+      const point = { wave, label: WAVE_LABELS[wave] || wave };
+      for (const row of chartData.lineData) {
+        if (selectedCountries.includes(row.countryCode) && row[wave] != null) {
+          point[row.country] = row[wave];
+        }
+      }
+      return point;
+    });
+  }, [chartData, selectedCountries]);
+
+  // Countries in current data
+  const availableCountries = useMemo(() => {
+    if (!chartData?.lineData) return [];
+    return chartData.lineData.map(d => ({
+      code: d.countryCode,
+      name: d.country,
+      selected: selectedCountries.includes(d.countryCode)
+    }));
+  }, [chartData, selectedCountries]);
+
+  // Export CSV
   const exportCSV = () => {
-    if (!chartData.length) return
-    const names = selectedCountries.map(c => availableCountries[c] || c)
-    const headers = ['Wave', ...names]
-    const rows = chartData.map(pt => {
-      const vals = [pt.wave]
-      names.forEach(n => vals.push(pt[n] !== undefined ? (visualizationType === 'mean' ? pt[n].toFixed(2) : pt[n].toFixed(1)) : ''))
-      return vals.join(',')
-    })
-    const csv = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const link = document.createElement('a')
-    link.download = `${selectedHarmonized}_timeseries.csv`
-    link.href = URL.createObjectURL(blob)
-    link.click()
+    if (!chartData?.lineData || !chartData?.variable) return;
+    const waves = chartData.variable.waves;
+    const headers = ['Country', 'Country Code', ...waves.map(w => `${w} Mean`), ...waves.map(w => `${w} N`)];
+    const rows = chartData.lineData
+      .filter(d => selectedCountries.includes(d.countryCode))
+      .map(d => [
+        d.country, d.countryCode,
+        ...waves.map(w => d[w] ?? ''),
+        ...waves.map(w => d[`${w}_n`] ?? '')
+      ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `abs_timeseries_${selectedVariable}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+      </div>
+    );
   }
-  
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      {/* Header */}
       <div>
-        <h1 className={`font-display text-2xl md:text-3xl font-bold ${darkMode ? 'text-dark-100' : 'text-earth-900'}`}>
-          Time Series Explorer
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Time-Series Explorer
         </h1>
-        <p className={darkMode ? 'text-dark-400' : 'text-earth-600'}>
-          Track changes in harmonized variables across survey waves (2001-2020)
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Track how public opinion has evolved across {metadata?.waveInfo ? Object.keys(metadata.waveInfo).length : 5} waves
+          of the Asian Barometer Survey (2001–2020).
+          {currentVar && (
+            <span className="ml-1">
+              Showing <strong>{filteredVariables.length}</strong> variables
+              in <em>{selectedCategory}</em>.
+            </span>
+          )}
         </p>
       </div>
-      
-      {/* Controls */}
-      <div className="card p-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Category */}
-          <div>
-            <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>Category</label>
-            <div className="select-wrapper">
-              <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="text-sm">
-                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
-            </div>
-          </div>
-          
-          {/* Variable */}
-          <div>
-            <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>Variable</label>
-            <div className="select-wrapper">
-              <select value={selectedHarmonized} onChange={(e) => setSelectedHarmonized(e.target.value)} className="text-sm">
-                {variablesInCategory.map(hv => (
-                  <option key={hv.id} value={hv.id}>{hv.label} ({Object.keys(hv.waves).length}W)</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          {/* Display Type */}
-          <div>
-            <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>Display</label>
-            <div className={`flex rounded-lg p-0.5 ${darkMode ? 'bg-dark-800' : 'bg-earth-100'}`}>
-              <button onClick={() => setVisualizationType('mean')}
-                className={`flex-1 py-2 px-2 rounded-md text-xs font-medium ${
-                  visualizationType === 'mean' ? (darkMode ? 'bg-dark-700 text-dark-100' : 'bg-white text-earth-900 shadow-sm') : (darkMode ? 'text-dark-400' : 'text-earth-600')
-                }`}>Mean</button>
-              <button onClick={() => setVisualizationType('proportion')}
-                className={`flex-1 py-2 px-2 rounded-md text-xs font-medium ${
-                  visualizationType === 'proportion' ? (darkMode ? 'bg-dark-700 text-dark-100' : 'bg-white text-earth-900 shadow-sm') : (darkMode ? 'text-dark-400' : 'text-earth-600')
-                }`}>%</button>
-            </div>
-          </div>
-          
-          {/* Response Value */}
-          {visualizationType === 'proportion' && responseOptions.length > 0 && (
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>Response</label>
-              <div className="select-wrapper">
-                <select value={selectedResponseValue} onChange={(e) => setSelectedResponseValue(parseInt(e.target.value))} className="text-sm">
-                  {responseOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.value}: {opt.label.slice(0, 25)}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
+
+      {/* Controls Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Category */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+            Category
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            {categories.map(cat => (
+              <option key={cat.name} value={cat.name}>{cat.name}</option>
+            ))}
+          </select>
         </div>
-        
-        {/* Variable Details Toggle */}
-        {selectedVarInfo && (
-          <div className="mb-4">
-            <button
-              onClick={() => setShowVariableDetails(!showVariableDetails)}
-              className={`text-sm flex items-center gap-1 ${darkMode ? 'text-forest-400 hover:text-forest-300' : 'text-forest-600 hover:text-forest-700'}`}
-            >
-              <Info className="w-4 h-4" />
-              {showVariableDetails ? 'Hide' : 'Show'} variable mapping details
-              {showVariableDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-            
-            {showVariableDetails && (
-              <div className={`mt-3 p-4 rounded-lg ${darkMode ? 'bg-dark-800' : 'bg-earth-50'}`}>
-                <p className={`text-sm mb-2 ${darkMode ? 'text-dark-200' : 'text-earth-800'}`}>
-                  <strong>Question:</strong> {selectedVarInfo.description}
-                </p>
-                {selectedVarInfo.notes && (
-                  <p className={`text-sm mb-3 flex items-start gap-2 ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>
-                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    {selectedVarInfo.notes}
-                  </p>
-                )}
-                
-                {/* Per-wave variable details */}
-                <div className="space-y-3">
-                  {Object.entries(waveDetails)
-                    .sort((a, b) => a[1].waveNum - b[1].waveNum)
-                    .map(([waveKey, details]) => (
-                      <div key={waveKey} className={`p-3 rounded ${darkMode ? 'bg-dark-900' : 'bg-white'}`}>
-                        <div className={`font-semibold text-sm mb-2 flex items-center gap-2 ${darkMode ? 'text-forest-400' : 'text-forest-600'}`}>
-                          Wave {details.waveNum}: <span className="font-mono">{details.varName}</span>
-                          {details.reversed && <span className={`px-2 py-0.5 rounded text-xs ${darkMode ? 'bg-amber-900/50 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>↔ Reversed</span>}
-                        </div>
-                        <div className={`text-xs mb-2 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>
-                          {details.label}
-                        </div>
-                        {Object.keys(details.valueLabels).length > 0 && (
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-1 text-xs">
-                            {Object.entries(details.valueLabels)
-                              .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                              .map(([val, label]) => (
-                                <div key={val} className={`flex gap-1 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>
-                                  <span className="font-mono font-semibold">{val}:</span>
-                                  <span className="truncate">{label}</span>
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
+
+        {/* Subcategory */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+            Sub-Category
+          </label>
+          <select
+            value={selectedSubcategory}
+            onChange={e => setSelectedSubcategory(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">All sub-categories</option>
+            {subcategories.map(sub => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Variable */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+            Variable ({filteredVariables.length})
+          </label>
+          <select
+            value={selectedVariable}
+            onChange={e => { setSelectedVariable(e.target.value); setSelectedCountries([]); }}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            {filteredVariables.map(v => (
+              <option key={v.id} value={v.id}>
+                {v.question.length > 80 ? v.question.slice(0, 77) + '...' : v.question}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Question display */}
+      {currentVar && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-900 dark:text-blue-200 font-medium">
+            {currentVar.question}
+          </p>
+          <div className="flex flex-wrap gap-3 mt-2 text-xs text-blue-700 dark:text-blue-300">
+            <span>Waves: {currentVar.waves.join(', ')}</span>
+            <span>•</span>
+            <span>Scale: {currentVar.scalePoints}-point</span>
+            {currentVar.notes && (
+              <>
+                <span>•</span>
+                <span className="text-amber-600 dark:text-amber-400">⚠ {currentVar.notes}</span>
+              </>
             )}
           </div>
-        )}
-        
-        {/* Country Selection */}
+        </div>
+      )}
+
+      {/* Country Pills */}
+      {availableCountries.length > 0 && (
         <div>
-          <label className={`block text-xs font-medium mb-2 ${darkMode ? 'text-dark-400' : 'text-earth-600'}`}>Countries (max 8)</label>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(availableCountries).map(([code, name]) => (
-              <button key={code} onClick={() => toggleCountry(code)}
-                className={`chip text-xs ${selectedCountries.includes(code) ? 'selected' : ''}`}
-                style={selectedCountries.includes(code) ? { backgroundColor: countryColors[code], color: 'white' } : {}}>
-                {name}
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Countries</span>
+            <button onClick={selectAllCountries} className="text-xs text-blue-500 hover:text-blue-700">Select All</button>
+            <button onClick={clearCountries} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {availableCountries.map(c => (
+              <button
+                key={c.code}
+                onClick={() => toggleCountry(c.code)}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  c.selected
+                    ? 'text-white shadow-sm'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+                style={c.selected ? { backgroundColor: COUNTRY_COLORS[c.name] || '#6B7280' } : {}}
+              >
+                {c.name}
               </button>
             ))}
           </div>
         </div>
-      </div>
-      
+      )}
+
       {/* Chart */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-display text-lg font-semibold flex items-center gap-2 ${darkMode ? 'text-dark-100' : 'text-earth-900'}`}>
-            <TrendingUp className={`w-5 h-5 ${darkMode ? 'text-forest-400' : 'text-forest-600'}`} />
-            {selectedVarInfo?.label || 'Time Series'}
-          </h3>
-          <button onClick={exportCSV} className={`btn btn-ghost flex items-center gap-2 text-sm ${darkMode ? 'text-dark-400' : ''}`}>
-            <Download className="w-4 h-4" /> CSV
+      {dataLoading ? (
+        <div className="flex items-center justify-center h-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+        </div>
+      ) : rechartsData.length > 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+          <ResponsiveContainer width="100%" height={420}>
+            <LineChart data={rechartsData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="wave"
+                tick={{ fontSize: 12 }}
+                tickFormatter={w => WAVE_LABELS[w] || w}
+              />
+              <YAxis
+                domain={chartData?.variable?.scalePoints ? [1, chartData.variable.scalePoints] : ['auto', 'auto']}
+                tick={{ fontSize: 11 }}
+                label={{
+                  value: 'Mean',
+                  angle: -90,
+                  position: 'insideLeft',
+                  style: { fontSize: 12, fill: '#6B7280' }
+                }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                iconType="circle"
+                iconSize={8}
+              />
+              {chartData?.lineData
+                .filter(d => selectedCountries.includes(d.countryCode))
+                .map(d => (
+                  <Line
+                    key={d.country}
+                    type="monotone"
+                    dataKey={d.country}
+                    stroke={COUNTRY_COLORS[d.country] || '#6B7280'}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                    connectNulls
+                  />
+                ))}
+            </LineChart>
+          </ResponsiveContainer>
+
+          {/* Scale reference */}
+          {chartData?.variable?.scaleLabels && Object.keys(chartData.variable.scaleLabels).length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                Scale: {Object.entries(chartData.variable.scaleLabels).map(([k, v]) => `${k}=${v}`).join(', ')}
+              </p>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* Action buttons */}
+      {chartData && (
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowTable(!showTable)}
+            className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          >
+            {showTable ? 'Hide' : 'Show'} Data Table
+          </button>
+          <button
+            onClick={exportCSV}
+            className="px-4 py-2 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
+          >
+            Export CSV
           </button>
         </div>
-        
-        {loading ? (
-          <div className="flex items-center justify-center h-80"><div className="spinner" /></div>
-        ) : chartData.length > 0 ? (
-          <div ref={chartContainerRef}>
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#454655' : '#d4c5a9'} opacity={0.5} />
-                <XAxis dataKey="wave" tick={{ fontSize: 12, fill: darkMode ? '#b1b3be' : '#725845' }} />
-                <YAxis domain={yAxisConfig.domain} ticks={yAxisConfig.ticks}
-                  tick={{ fontSize: 12, fill: darkMode ? '#b1b3be' : '#725845' }}
-                  label={{ value: visualizationType === 'mean' ? 'Mean' : '%', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: darkMode ? '#b1b3be' : '#725845' }}} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                {selectedCountries.map(code => (
-                  <Line key={code} type="monotone" dataKey={availableCountries[code] || code}
-                    stroke={countryColors[code]} strokeWidth={2} dot={{ r: 4, fill: countryColors[code] }} connectNulls />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className={`flex items-center justify-center h-80 ${darkMode ? 'text-dark-400' : 'text-earth-500'}`}>
-            Select a variable and countries
-          </div>
-        )}
-      </div>
-      
+      )}
+
       {/* Data Table */}
-      {chartData.length > 0 && (
-        <div className="card p-6">
-          <div className="overflow-x-auto">
-            <table className="data-table text-sm">
-              <thead>
-                <tr>
-                  <th>Wave</th>
-                  {selectedCountries.map(c => (
-                    <th key={c}>
-                      <span className="inline-block w-2 h-2 rounded-full mr-1" style={{ backgroundColor: countryColors[c] }} />
-                      {availableCountries[c]}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {chartData.map((row, i) => (
-                  <tr key={i}>
-                    <td className="font-medium">{row.wave}</td>
-                    {selectedCountries.map(c => {
-                      const name = availableCountries[c] || c
-                      const val = row[name]
-                      return <td key={c} className="font-mono">{val !== undefined ? (visualizationType === 'mean' ? val.toFixed(2) : `${val.toFixed(1)}%`) : '—'}</td>
-                    })}
+      {showTable && chartData?.lineData && (
+        <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                  Country
+                </th>
+                {chartData.variable.waves.map(w => (
+                  <th key={w} className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                    {w}<br /><span className="font-normal normal-case">{WAVE_LABELS[w]}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+              {chartData.lineData
+                .filter(d => selectedCountries.includes(d.countryCode))
+                .map(d => (
+                  <tr key={d.countryCode} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    <td className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                      <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: COUNTRY_COLORS[d.country] }} />
+                      {d.country}
+                    </td>
+                    {chartData.variable.waves.map(w => (
+                      <td key={w} className="px-4 py-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                        {d[w] != null ? (
+                          <span>
+                            <span className="font-mono">{d[w].toFixed(2)}</span>
+                            <span className="text-xs text-gray-400 ml-1">(n={d[`${w}_n`] || '?'})</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 dark:text-gray-600">—</span>
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
       )}
     </div>
-  )
+  );
 }
-
-export default TimeSeriesExplorer
