@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { parse } from 'csv-parse/sync'
+import { CATEGORIES, TIME_SERIES_VARIABLES, WAVE_INFO, MISSING_VALUES } from '../data/HARMONIZED_VARIABLES.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -25,10 +26,9 @@ const COUNTRY_NAMES = {
   18: 'India',
 }
 
-let configCache = null
-const dataCache = {}
+const dataCache = new Map()
 
-function readJsonFromCandidates(relativePaths) {
+function readCsvFromCandidates(relativePaths) {
   const candidates = relativePaths.flatMap((relativePath) => [
     path.join(__dirname, '..', relativePath),
     path.join(process.cwd(), relativePath),
@@ -36,80 +36,47 @@ function readJsonFromCandidates(relativePaths) {
   ])
 
   for (const candidate of candidates) {
-    try {
-      if (fs.existsSync(candidate)) {
-        return JSON.parse(fs.readFileSync(candidate, 'utf-8'))
-      }
-    } catch {
-      continue
-    }
+    if (!fs.existsSync(candidate)) continue
+
+    const raw = fs.readFileSync(candidate, 'utf-8')
+    return parse(raw, {
+      columns: true,
+      skip_empty_lines: true,
+      cast: (value) => {
+        const trimmed = typeof value === 'string' ? value.trim() : value
+        if (trimmed === '' || trimmed === 'NA' || trimmed === 'NaN') return null
+        const num = Number(trimmed)
+        return Number.isNaN(num) ? value : num
+      },
+    })
   }
 
   return null
-}
-
-function loadConfig() {
-  if (configCache) return configCache
-
-  const config = readJsonFromCandidates([
-    path.join('data', 'harmonization_config.json'),
-    path.join('data', 'survey_metadata.json'),
-  ])
-
-  if (!config) {
-    throw new Error('Could not load harmonization config')
-  }
-
-  configCache = config
-  return configCache
 }
 
 function loadWaveData(wave) {
-  if (dataCache[wave]) return dataCache[wave]
+  if (dataCache.has(wave)) return dataCache.get(wave)
 
-  const waveNum = wave.replace(/^W/i, '')
-  const candidates = [
-    path.join(__dirname, '..', 'data', `wave${waveNum}_data.csv`),
-    path.join(process.cwd(), 'data', `wave${waveNum}_data.csv`),
-    path.join(process.cwd(), '..', 'data', `wave${waveNum}_data.csv`),
-  ]
+  const waveNum = String(wave).replace(/^W/i, '')
+  const records = readCsvFromCandidates([
+    path.join('data', `wave${waveNum}_data.csv`),
+  ])
 
-  for (const csvPath of candidates) {
-    try {
-      if (!fs.existsSync(csvPath)) continue
-
-      const raw = fs.readFileSync(csvPath, 'utf-8')
-      const records = parse(raw, {
-        columns: true,
-        skip_empty_lines: true,
-        cast: (value) => {
-          const trimmed = typeof value === 'string' ? value.trim() : value
-          if (trimmed === '') return value
-          const num = Number(trimmed)
-          return Number.isNaN(num) ? value : num
-        },
-      })
-
-      dataCache[wave] = records
-      return records
-    } catch {
-      continue
-    }
+  if (!records) {
+    return null
   }
 
-  console.error(`Failed to load data for ${wave}`)
-  return null
+  dataCache.set(wave, records)
+  return records
+}
+
+function normalizeWaveKey(waveKey) {
+  return String(waveKey || '').toUpperCase()
 }
 
 function reverseCode(value, scalePoints) {
-  if (typeof value !== 'number' || scalePoints == null) return value
+  if (typeof value !== 'number' || !Number.isFinite(value) || !scalePoints) return value
   return scalePoints + 1 - value
-}
-
-function isMissing(value, wave, config) {
-  if (value == null || value === '' || value === undefined) return true
-  const mvCodes = config.missingValues?.[wave] || []
-  return mvCodes.includes(value)
 }
 
 function remapTrust6to4(value) {
@@ -121,7 +88,7 @@ function remapTrust6to4(value) {
     5: 1.5,
     6: 1,
   }
-  return map[value] || value
+  return map[value] ?? value
 }
 
 function remapPolPart(value, wave) {
@@ -135,30 +102,23 @@ function remapPolPart(value, wave) {
     return map[value] ?? value
   }
 
-  if (wave === 'W1') {
-    if (value === 9) return 0
-    return value
-  }
-
+  if (wave === 'W1' && value === 9) return 0
   return value
 }
 
 function applyRecode(value, recode, scalePoints, wave) {
-  if (recode === 'reverse') {
-    return reverseCode(value, scalePoints)
-  }
-
+  if (recode === 'reverse') return reverseCode(value, scalePoints)
   if (recode === 'remap') {
-    if (scalePoints === 6 || scalePoints === '6') {
-      return remapTrust6to4(value)
-    }
-
-    if (scalePoints === 3) {
-      return remapPolPart(value, wave)
-    }
+    if (scalePoints === 6 || scalePoints === '6') return remapTrust6to4(value)
+    if (scalePoints === 3) return remapPolPart(value, wave)
   }
-
   return value
+}
+
+function isMissing(value, wave) {
+  if (value == null || value === '' || Number.isNaN(value)) return true
+  const missing = MISSING_VALUES[wave] || []
+  return missing.includes(value)
 }
 
 function resolveColumnName(columns, target) {
@@ -170,18 +130,37 @@ function resolveColumnName(columns, target) {
   if (caseInsensitiveMatch) return caseInsensitiveMatch
 
   const normalizedTarget = lowerTarget.replace(/[^a-z0-9]/g, '')
-  const normalizedMatch = columns.find(
-    (column) => column.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedTarget
+  return (
+    columns.find((column) => column.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedTarget) ||
+    null
   )
-  return normalizedMatch || null
 }
 
 function getCountryColumn(columns) {
   return (
+    columns.find((column) => column.toLowerCase() === 'country_code') ||
     columns.find((column) => column.toLowerCase() === 'country') ||
     columns.find((column) => column.toLowerCase().includes('country')) ||
     null
   )
+}
+
+function buildCatalog() {
+  return {
+    categories: CATEGORIES,
+    variables: TIME_SERIES_VARIABLES.map((variable) => ({
+      id: variable.id,
+      category: variable.category,
+      subcategory: variable.subcategory,
+      question: variable.question,
+      label: variable.label || variable.question,
+      scalePoints: variable.scalePoints,
+      notes: variable.notes || null,
+      waves: Object.keys(variable.waves || {}).map((wave) => normalizeWaveKey(wave)),
+      includeTimeSeries: true,
+    })),
+    waveInfo: WAVE_INFO,
+  }
 }
 
 export default function handler(req, res) {
@@ -198,30 +177,13 @@ export default function handler(req, res) {
 
   try {
     const { variableId, countries } = req.query
-    const config = loadConfig()
 
     if (!variableId) {
-      const tsVars = (config.variables || [])
-        .filter((variable) => variable.includeTimeSeries)
-        .map((variable) => ({
-          id: variable.id,
-          category: variable.category,
-          subcategory: variable.subcategory,
-          question: variable.question,
-          waves: Object.keys(variable.waves || {}),
-          scalePoints: variable.scalePoints,
-          notes: variable.notes || null,
-        }))
-
-      return res.status(200).json({
-        categories: config.categories || [],
-        variables: tsVars,
-        waveInfo: config.waveInfo || {},
-      })
+      return res.status(200).json(buildCatalog())
     }
 
-    const varDef = (config.variables || []).find((variable) => variable.id === variableId)
-    if (!varDef) {
+    const variable = TIME_SERIES_VARIABLES.find((entry) => entry.id === variableId)
+    if (!variable) {
       return res.status(404).json({ error: `Variable '${variableId}' not found` })
     }
 
@@ -232,106 +194,110 @@ export default function handler(req, res) {
           .filter((country) => Number.isFinite(country))
       : null
 
-    const results = {}
-    const waveKeys = Object.keys(varDef.waves || {}).sort()
+    const waveKeys = Object.keys(variable.waves || {})
+      .map((wave) => normalizeWaveKey(wave))
+      .sort()
+
+    const resultsByWave = {}
 
     for (const wave of waveKeys) {
-      const waveDef = varDef.waves[wave]
+      const waveDef = variable.waves[wave]
+      if (!waveDef) continue
+
       const data = loadWaveData(wave)
       if (!data || data.length === 0) continue
 
       const sampleRow = data[0]
       const columns = Object.keys(sampleRow)
-      const colName = resolveColumnName(columns, waveDef.var)
-      if (!colName) {
-        console.warn(`Column '${waveDef.var}' not found in ${wave}. Available: ${columns.slice(0, 10).join(', ')}...`)
-        continue
-      }
+      const valueColumn = resolveColumnName(columns, waveDef.var)
+      const countryColumn = getCountryColumn(columns)
 
-      const countryCol = getCountryColumn(columns)
-      if (!countryCol) {
-        console.warn(`Country column not found in ${wave}`)
-        continue
-      }
+      if (!valueColumn || !countryColumn) continue
 
-      const countryData = {}
+      const byCountry = {}
 
       for (const row of data) {
-        const countryCode = Number(row[countryCol])
+        const countryCode = Number(row[countryColumn])
         if (!COUNTRY_NAMES[countryCode]) continue
         if (countryFilter && !countryFilter.includes(countryCode)) continue
 
-        let value = row[colName]
+        let value = row[valueColumn]
         if (typeof value === 'string' && value !== '') {
-          const num = Number(value)
-          if (!Number.isNaN(num)) value = num
+          const parsed = Number(value)
+          if (!Number.isNaN(parsed)) value = parsed
         }
 
-        if (isMissing(value, wave, config)) continue
+        if (isMissing(value, wave)) continue
 
-        value = applyRecode(value, waveDef.recode, varDef.scalePoints, wave)
+        value = applyRecode(value, waveDef.recode, variable.scalePoints, wave)
         if (value == null || Number.isNaN(value)) continue
 
-        if (!countryData[countryCode]) {
-          countryData[countryCode] = { sum: 0, count: 0, values: [] }
+        if (!byCountry[countryCode]) {
+          byCountry[countryCode] = { sum: 0, count: 0, values: [] }
         }
 
-        countryData[countryCode].sum += value
-        countryData[countryCode].count += 1
-        countryData[countryCode].values.push(value)
+        byCountry[countryCode].sum += value
+        byCountry[countryCode].count += 1
+        byCountry[countryCode].values.push(value)
       }
 
       const waveResults = {}
-      for (const [code, stats] of Object.entries(countryData)) {
+      for (const [countryCode, stats] of Object.entries(byCountry)) {
         const mean = stats.sum / stats.count
-        const sorted = [...stats.values].sort((a, b) => a - b)
-        const median = sorted[Math.floor(sorted.length / 2)]
+        const sortedValues = [...stats.values].sort((a, b) => a - b)
+        const median = sortedValues[Math.floor(sortedValues.length / 2)]
 
-        waveResults[code] = {
-          country: COUNTRY_NAMES[Number(code)],
-          countryCode: Number(code),
+        waveResults[countryCode] = {
+          country: COUNTRY_NAMES[Number(countryCode)],
+          countryCode: Number(countryCode),
           mean: Math.round(mean * 1000) / 1000,
           median,
           n: stats.count,
         }
       }
 
-      results[wave] = waveResults
+      resultsByWave[wave] = waveResults
     }
 
     const allCountryCodes = new Set()
-    for (const wave of Object.keys(results)) {
-      for (const code of Object.keys(results[wave])) {
-        allCountryCodes.add(Number(code))
+    for (const wave of Object.keys(resultsByWave)) {
+      for (const countryCode of Object.keys(resultsByWave[wave])) {
+        allCountryCodes.add(Number(countryCode))
       }
     }
 
     const lineData = Array.from(allCountryCodes)
       .sort((a, b) => a - b)
-      .map((code) => {
-        const row = { country: COUNTRY_NAMES[code], countryCode: code }
+      .map((countryCode) => {
+        const row = {
+          country: COUNTRY_NAMES[countryCode],
+          countryCode,
+        }
+
         for (const wave of waveKeys) {
-          if (results[wave] && results[wave][code]) {
-            row[wave] = results[wave][code].mean
-            row[`${wave}_n`] = results[wave][code].n
+          if (resultsByWave[wave]?.[countryCode]) {
+            row[wave] = resultsByWave[wave][countryCode].mean
+            row[`${wave}_n`] = resultsByWave[wave][countryCode].n
           }
         }
+
         return row
       })
 
     return res.status(200).json({
       variable: {
-        id: varDef.id,
-        category: varDef.category,
-        subcategory: varDef.subcategory,
-        question: varDef.question,
-        scaleLabels: varDef.scaleLabels,
-        scalePoints: varDef.scalePoints,
-        notes: varDef.notes || null,
-        waves: Object.keys(varDef.waves || {}),
+        id: variable.id,
+        category: variable.category,
+        subcategory: variable.subcategory,
+        question: variable.question,
+        label: variable.label || variable.question,
+        scaleLabels: variable.scaleLabels || null,
+        scalePoints: variable.scalePoints,
+        notes: variable.notes || null,
+        waves: waveKeys,
       },
       lineData,
-      rawByWave: results,
+      rawByWave: resultsByWave,
     })
   } catch (error) {
     console.error('Time series error:', error)
