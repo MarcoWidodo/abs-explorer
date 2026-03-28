@@ -1,0 +1,2260 @@
+{
+  "version": "1.0",
+  "description": "ABS Variable Harmonization Config",
+  "waveInfo": {
+    "W1": {
+      "years": "2001-2003",
+      "countries": 8
+    },
+    "W2": {
+      "years": "2005-2008",
+      "countries": 13
+    },
+    "W3": {
+      "years": "2010-2012",
+      "countries": 13
+    },
+    "W4": {
+      "years": "2014-2016",
+      "countries": 14
+    },
+    "W5": {
+      "years": "2018-2020",
+      "countries": 16
+    }
+  },
+  "missingValues": {
+    "W1": [
+      97,
+      98,
+      99
+    ],
+    "W2": [
+      7,
+      8,
+      9
+    ],
+    "W3": [
+      -1,
+      7,
+      8,
+      9
+    ],
+    "W4": [
+      -1,
+      97,
+      98,
+      99
+    ],
+    "W5": [
+      -1,
+      7,
+      8,
+      9,
+      97,
+      98,
+      99
+    ]
+  },
+  "categories": [
+    {
+      "name": "Economic Evaluations",
+      "subcategories": [
+        "Family Economy",
+        "National Economy"
+      ]
+    },
+    {
+      "name": "Redistribution",
+      "subcategories": [
+        "Income Equality",
+        "Income Security"
+      ]
+    },
+    {
+      "name": "Trust in Institutions",
+      "subcategories": [
+        "Civil Society Trust",
+        "Government Trust"
+      ]
+    },
+    {
+      "name": "Social Capital",
+      "subcategories": [
+        "Interpersonal Trust"
+      ]
+    },
+    {
+      "name": "Participation in Elections",
+      "subcategories": [
+        "Campaign Activity",
+        "Election Quality",
+        "Voting"
+      ]
+    },
+    {
+      "name": "Access to Public Service",
+      "subcategories": [
+        "Service Access"
+      ]
+    },
+    {
+      "name": "Safety",
+      "subcategories": [
+        "Safety"
+      ]
+    },
+    {
+      "name": "Psychological Involvement",
+      "subcategories": [
+        "Discussing with Family and Friends",
+        "Media Consumption",
+        "Political Interest"
+      ]
+    },
+    {
+      "name": "Partisanship",
+      "subcategories": [
+        "Party Identification"
+      ]
+    },
+    {
+      "name": "Traditionalism",
+      "subcategories": [
+        "Collectivism",
+        "Conflict Resolution",
+        "Family Values",
+        "Fatalism",
+        "Gender Attitudes",
+        "Social Norms"
+      ]
+    },
+    {
+      "name": "Political Participation",
+      "subcategories": [
+        "Contacting Officials",
+        "Protest",
+        "Voting History"
+      ]
+    },
+    {
+      "name": "Government Satisfaction",
+      "subcategories": [
+        "Government Capacity",
+        "Government Support"
+      ]
+    },
+    {
+      "name": "Satisfaction with Democracy",
+      "subcategories": [
+        "Democratic Assessment",
+        "Democratic Satisfaction"
+      ]
+    },
+    {
+      "name": "Democracy Legitimacy",
+      "subcategories": [
+        "Regime Preference"
+      ]
+    },
+    {
+      "name": "Democratic Legitimacy",
+      "subcategories": [
+        "Democratic Confidence",
+        "Regime Preference"
+      ]
+    },
+    {
+      "name": "Authoritarian/Democratic Values",
+      "subcategories": [
+        "Authoritarian Alternatives",
+        "Checks and Balances",
+        "Gender & Politics",
+        "Government Censorship",
+        "Paternalistic Governance",
+        "Religion in Politics",
+        "Social Values"
+      ]
+    },
+    {
+      "name": "Regime Evaluation",
+      "subcategories": [
+        "Democratic Assessment",
+        "External Assessment",
+        "Quality of Governance"
+      ]
+    },
+    {
+      "name": "Citizen Empowerment",
+      "subcategories": [
+        "Internal Efficacy"
+      ]
+    },
+    {
+      "name": "International Relations",
+      "subcategories": [
+        "Geopolitics"
+      ]
+    },
+    {
+      "name": "Citizenship",
+      "subcategories": [
+        "National Identity"
+      ]
+    },
+    {
+      "name": "Socio-Economic",
+      "subcategories": [
+        "Demographics"
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "id": "econ_national_current",
+      "category": "Economic Evaluations",
+      "subcategory": "National Economy",
+      "question": "How would you rate the overall economic condition of our country today?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q001",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q1",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q1",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q1",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q1",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "econ_national_retro",
+      "category": "Economic Evaluations",
+      "subcategory": "National Economy",
+      "question": "How would you describe the change in the economic condition of our country over the last few years?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q002",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q2",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q2",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q2",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q2",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "econ_national_prosp",
+      "category": "Economic Evaluations",
+      "subcategory": "National Economy",
+      "question": "What do you think will be the state of our country's economic condition a few years from now?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q003",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q3",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q3",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q3",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q3",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "econ_family_current",
+      "category": "Economic Evaluations",
+      "subcategory": "Family Economy",
+      "question": "As for your own family, how do you rate the economic situation of your family today?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q004",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q4",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q4",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q4",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q4",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "econ_family_retro",
+      "category": "Economic Evaluations",
+      "subcategory": "Family Economy",
+      "question": "How would you compare the current economic condition of your family with what it was a few years ago?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q005",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q5",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q5",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q5",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q5",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "econ_family_prosp",
+      "category": "Economic Evaluations",
+      "subcategory": "Family Economy",
+      "question": "What do you think the economic situation of your family will be a few years from now?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q006",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q6",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q6",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q6",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q6",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trust_executive",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the executive office (president or prime minister)?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W2": {
+          "var": "q7",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q7",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q7",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q7",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_courts",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the courts?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q007",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q8",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q8",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q8",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q8",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_natl_govt",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the national government [in the capital city]?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q008",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q9",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q9",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q9",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q9",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_parties",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in political parties?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q009",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q10",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q10",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q10",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q10",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_parliament",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in Parliament?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q010",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q11",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q11",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q11",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q11",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_civil_service",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the civil service?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q011",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q12",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q12",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q12",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q12",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_military",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the military or armed forces?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q012",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q13",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q13",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q13",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q13",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_police",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the police?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q013",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q14",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q14",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q14",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q14",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_local_govt",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in local government?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q014",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q15",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q15",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q15",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q15",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_election_comm",
+      "category": "Trust in Institutions",
+      "subcategory": "Government Trust",
+      "question": "How much trust do you have in the election commission?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q017",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q18",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q18",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q18",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q16",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "trust_ngos",
+      "category": "Trust in Institutions",
+      "subcategory": "Civil Society Trust",
+      "question": "How much trust do you have in non-government organizations or NGOs?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W1": {
+          "var": "q018",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q19",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q19",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q19",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q17",
+          "recode": "remap"
+        }
+      }
+    },
+    {
+      "id": "social_trust_general",
+      "category": "Social Capital",
+      "subcategory": "Interpersonal Trust",
+      "question": "Generally speaking, would you say that most people can be trusted or that you must be very careful?",
+      "scalePoints": 2,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q024",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q23",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q23",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q23",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q22",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "social_trust_general_2",
+      "category": "Social Capital",
+      "subcategory": "Interpersonal Trust",
+      "question": "Generally speaking, would you say you strongly agree, somewhat agree, somewhat disagree, or strongly disagree with the statement that \"most people are trustworthy\"?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q49",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q24",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q23",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "social_trust_relatives",
+      "category": "Social Capital",
+      "subcategory": "Interpersonal Trust",
+      "question": "How much trust do you have in your relatives?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W2": {
+          "var": "q24",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q25",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q26",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q24",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "social_trust_neighbors",
+      "category": "Social Capital",
+      "subcategory": "Interpersonal Trust",
+      "question": "How much trust do you have in your neighbors?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W2": {
+          "var": "q25",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q26",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q27",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q25",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "social_trust_others",
+      "category": "Social Capital",
+      "subcategory": "Interpersonal Trust",
+      "question": "How much trust do you have in other people you interact with?",
+      "scalePoints": 6,
+      "includeTimeSeries": true,
+      "notes": "W5 uses a 6-point scale rather than a 4-point scale; remap accordingly: 1=Trust fully, 2=Trust a lot, 3=Trust somewhat, 4=Distrust somewhat, 5=Distrust a lot, 6=Distrust fully",
+      "waves": {
+        "W2": {
+          "var": "q26",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q27",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q28",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q26",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "elec_voted",
+      "category": "Participation in Elections",
+      "subcategory": "Voting",
+      "question": "Did you vote in the [most recent national] election?",
+      "scalePoints": 2,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q027",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q38",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q32",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q33",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q33",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "elec_voted_win",
+      "category": "Participation in Elections",
+      "subcategory": "Voting",
+      "question": "Did the respondent vote for the winning camp or losing camp?",
+      "scalePoints": 2,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q39a",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q33a",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q34a",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q34a",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "elec_campaign_rally",
+      "category": "Participation in Elections",
+      "subcategory": "Campaign Activity",
+      "question": "Did you attend a campaign meeting or rally?",
+      "scalePoints": 2,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q029",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q40",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q34",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q35",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q35",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "elec_persuade",
+      "category": "Participation in Elections",
+      "subcategory": "Campaign Activity",
+      "question": "Did you try to persuade others to vote for a certain candidate or party?",
+      "scalePoints": 2,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q030",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q41",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q35",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q36",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q36",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "elec_free_fair",
+      "category": "Participation in Elections",
+      "subcategory": "Election Quality",
+      "question": "How would you rate the freeness and fairness of the last national election?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q43",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q37",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q38",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q38",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "public_svc_police",
+      "category": "Access to Public Service",
+      "subcategory": "Service Access",
+      "question": "How easy or difficult is it to get help from the police when you need it?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q47",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q41",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q42",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q43",
+          "recode": "none"
+        }
+      }
+    },
+    {
+      "id": "public_safety",
+      "category": "Safety",
+      "subcategory": "Safety",
+      "question": "Generally speaking, how safe is living in this city/town/village – very safe, safe, unsafe, or very unsafe?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q33",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q42",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q43",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q45",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "psych_interest_politics",
+      "category": "Psychological Involvement",
+      "subcategory": "Political Interest",
+      "question": "How interested would you say you are in politics?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q056",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q49",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q43",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q44",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q46",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "psych_follow_news",
+      "category": "Psychological Involvement",
+      "subcategory": "Media Consumption",
+      "question": "How often do you follow news about politics and government?",
+      "scalePoints": 5,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q057",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q50",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q44",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q45",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q47",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "psych_fam_friends",
+      "category": "Psychological Involvement",
+      "subcategory": "Discussing with Family and Friends",
+      "question": "When you get together with your family members or friends, how often do you discuss political matters?",
+      "scalePoints": 3,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q52",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q46",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q46",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q48",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "party_closeness",
+      "category": "Partisanship",
+      "subcategory": "Party Identification",
+      "question": "How close do you feel to [party named]?",
+      "scalePoints": 3,
+      "includeTimeSeries": true,
+      "notes": "Not asked in China.",
+      "waves": {
+        "W1": {
+          "var": "q063",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q55",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q48",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q54",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q57",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_parents_obey",
+      "category": "Traditionalism",
+      "subcategory": "Family Values",
+      "question": "Even if parents' demands are unreasonable, children still should do what they ask",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q064",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q56",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q55",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q60",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q62",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_fate",
+      "category": "Traditionalism",
+      "subcategory": "Fatalism",
+      "question": "Wealth and poverty, success and failure are all determined by fate",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q067",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q61",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q66",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q68",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_conform",
+      "category": "Traditionalism",
+      "subcategory": "Social Norms",
+      "question": "A person should not insist on his own opinion if co-workers disagree",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q068",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q59",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q60",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q65",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q67",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_family_first",
+      "category": "Traditionalism",
+      "subcategory": "Family Values",
+      "question": "For the sake of the family, the individual should put personal interests second",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q069",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q60",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q50",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q55",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q58",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_collective_interest",
+      "category": "Traditionalism",
+      "subcategory": "Collectivism",
+      "question": "In a group, we should sacrifice our individual interest for the sake of the group's collective interest.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q51",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q56",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q59",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_national_interest",
+      "category": "Traditionalism",
+      "subcategory": "Collectivism",
+      "question": "For the sake of national interest, individual interest could be sacrificed.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q143",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q76",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q52",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q57",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q60",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_longterm_peace",
+      "category": "Traditionalism",
+      "subcategory": "Social Norms",
+      "question": "When dealing with others, developing a long-term relationship is more important than securing one's immediate interest.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q62",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q53",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q58",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q61",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_obey_elders",
+      "category": "Traditionalism",
+      "subcategory": "Family Values",
+      "question": "When a mother-in-law and a daughter-in-law come into conflict, even if the mother-in-law is in the wrong, the husband should still persuade his wife to obey his mother.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q072",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q56",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q61",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q63",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_obey_teachers",
+      "category": "Traditionalism",
+      "subcategory": "Social Norms",
+      "question": "Being a student, one should not question the authority of their teacher.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q57",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q57",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q62",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q64",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_group_harmony",
+      "category": "Traditionalism",
+      "subcategory": "Conflict Resolution",
+      "question": "In a group, we should avoid open quarrel to preserve the harmony of the group.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q63",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q58",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q63",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q65",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_avoid_disagreement",
+      "category": "Traditionalism",
+      "subcategory": "Conflict Resolution",
+      "question": "Even if there is some disagreement with others, one should avoid the conflict.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q59",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q64",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q66",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "trad_boy_over_girl",
+      "category": "Traditionalism",
+      "subcategory": "Gender Attitudes",
+      "question": "If one could have only one child, it is more preferable to have a boy than a girl.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q62",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q67",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q69",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "polpart_voting_history",
+      "category": "Political Participation",
+      "subcategory": "Voting History",
+      "question": "Thinking of whether you voted or not ever since you became eligible for voting, how would you describe yourself—have you voted in every election, voted in most elections, voted in some elections or hardly ever voted?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q90",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q73",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q78",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q81",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_capable_gov",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Capacity",
+      "question": "Over the long run, our system of government is capable of solving the problems our country faces.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q80",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q83",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q86",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_proud",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Support",
+      "question": "Thining in general, I am proud of our system of government.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q81",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q84",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q87",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_support",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Support",
+      "question": "A system like ours, even if it runs into problems, deserves the people's support.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q82",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q85",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q88",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_status_quo",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Support",
+      "question": "I would rather live under our system of government than any other that I can think of.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q83",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q86",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q89",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_change",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Support",
+      "question": "Compared with other systems in the world, would you say our system of government works fine as it is, needs minor change, needs major change, or should be replaced?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q84",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q87",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q90",
+          "recode": "none"
+        }
+      }
+    },
+    {
+      "id": "dem_satisfaction",
+      "category": "Satisfaction with Democracy",
+      "subcategory": "Democratic Satisfaction",
+      "question": "On the whole, how satisfied or dissatisfied are you with the way democracy works in our country?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q098",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q93",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q89",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q92",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q99",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_category",
+      "category": "Satisfaction with Democracy",
+      "subcategory": "Democratic Assessment",
+      "question": "In your opinion, how much of a democracy is [Country Name]?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q94",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q90",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q93",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q100",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_suitable",
+      "category": "Democracy Legitimacy",
+      "subcategory": "Regime Preference",
+      "question": "Here is a similar scale of 1 to 10 measuring the extent to which people think democracy is suitable for our country. If \"1\" means that democracy is completely unsuitable for [name of country] today and \"10\" means that it is completely suitable, where would you place our country today?",
+      "scalePoints": 10,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q103",
+          "recode": "none"
+        },
+        "W2": {
+          "var": "q98",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q94",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q97",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q104",
+          "recode": "none"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_incumbent_satis",
+      "category": "Government Satisfaction",
+      "subcategory": "Government Support",
+      "question": "How satisfied or dissatisfied are you with the [name of president, etc. current ruling] government?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q104",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q99",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q95",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q98",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q105",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_preference",
+      "category": "Democratic Legitimacy",
+      "subcategory": "Regime Preference",
+      "question": "Which statement comes closest: Democracy preferable / Authoritarian sometimes / Doesn't matter?",
+      "scalePoints": 3,
+      "includeTimeSeries": true,
+      "notes": "For W2, the code is as follows: 1=For people like me it does not matter, 2=Under some circumstances an authoritarian government can be preferable to a democratic one, 3=Democracy is always preferable to any other kind of government",
+      "waves": {
+        "W1": {
+          "var": "q117",
+          "recode": "none"
+        },
+        "W2": {
+          "var": "q121",
+          "recode": "remap"
+        },
+        "W3": {
+          "var": "q124",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q125",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q132",
+          "recode": "none"
+        }
+      }
+    },
+    {
+      "id": "dem_reject_strongman",
+      "category": "Authoritarian/Democratic Values",
+      "subcategory": "Authoritarian Alternatives",
+      "question": "We should get rid of parliament and elections and have a strong leader decide things",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q121",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q124",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q129",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q130",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q137",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_reject_military",
+      "category": "Authoritarian/Democratic Values",
+      "subcategory": "Authoritarian Alternatives",
+      "question": "The army should come in to govern the country",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q123",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q126",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q131",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q132",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q139",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_reject_technocrat",
+      "category": "Authoritarian/Democratic Values",
+      "subcategory": "Authoritarian Alternatives",
+      "question": "We should let experts/technocrats make decisions for the country",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q124",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q132",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q133",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q140",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_reject_oneparty",
+      "category": "Authoritarian/Democratic Values",
+      "subcategory": "Authoritarian Alternatives",
+      "question": "Only one political party should be allowed to stand for election and hold office",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W1": {
+          "var": "q122",
+          "recode": "reverse"
+        },
+        "W2": {
+          "var": "q125",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q130",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q131",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q138",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_accountability",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "Between elections, the people have no way of holding the government responsible for its actions.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q106",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q100",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q103",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q110",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_judicial_checks",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "When government leaders break the laws, there is nothing the court can do.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q107",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q101",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q104",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q111",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_ethnic",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "All citizens from different ethnic communities in [Country X] are treated equally by the government.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q103",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q105",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q112",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_gov_rich_poor",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "Rich and poor people are treated equally by the government.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q104",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q106",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q113",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_basic_necessities",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "People have basic necessities like food, clothes, and shelter.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q109",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q105",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q107",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q114",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_free_speech",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "People are free to speak what they think without fear.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q110",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q106",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q108",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q115",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_join_org",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "People can join any organization they like without fear.",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q111",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q107",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q109",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q116",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_withhold_info",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "How often do government officials withhold important information from the public?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q112",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q109",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q111",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q117",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_break_law",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "How often do you think government leaders break the law or abuse their power?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q113",
+          "recode": "none"
+        },
+        "W3": {
+          "var": "q110",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q112",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q118",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_real_choice",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "How often do you think our elections offer the voters a real choice between different parties/candidates?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q114",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q111",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q113",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q119",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_legislative_checks",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "To what extent is the legislature capable of keeping government leaders in check?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q115",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q112",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q114",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q120",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_responsive_gov",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "How well do you think the government responds to what people want?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W2": {
+          "var": "q116",
+          "recode": "reverse"
+        },
+        "W3": {
+          "var": "q113",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q115",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q121",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_elections_responsive",
+      "category": "Regime Evaluation",
+      "subcategory": "Quality of Governance",
+      "question": "How much do you feel that having elections make the government more responsibe to people's needs?",
+      "scalePoints": 4,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q115",
+          "recode": "reverse"
+        },
+        "W4": {
+          "var": "q116",
+          "recode": "reverse"
+        },
+        "W5": {
+          "var": "q122",
+          "recode": "reverse"
+        }
+      }
+    },
+    {
+      "id": "dem_future",
+      "category": "Regime Evaluation",
+      "subcategory": "Democratic Assessment",
+      "question": "Where would you expect our country to be ten years from now?",
+      "scalePoints": 10,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q93",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q96",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q103",
+          "recode": "none"
+        }
+      }
+    },
+    {
+      "id": "dem_china_scale",
+      "category": "Regime Evaluation",
+      "subcategory": "External Assessment",
+      "question": "Where would you place China today on the democratic scale?",
+      "scalePoints": 10,
+      "includeTimeSeries": true,
+      "waves": {
+        "W3": {
+          "var": "q120",
+          "recode": "none"
+        },
+        "W4": {
+          "var": "q121",
+          "recode": "none"
+        },
+        "W5": {
+          "var": "q128",
+          "recode": "none"
+        }
+      }
+    }
+  ]
+}
