@@ -1,0 +1,580 @@
+{
+  "countries": {
+    "JP": {
+      "display_name": "Japan",
+      "iso_alpha2": "JP",
+      "iso_alpha3": "JPN",
+      "iso_numeric": "392",
+      "map_id": "JPN",
+      "spreadsheet_code": 1,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 1,
+          "respondents": 1418
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 1,
+          "respondents": 1067
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 1,
+          "respondents": 1880
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 1,
+          "respondents": 1081
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 1,
+          "respondents": 1045
+        }
+      }
+    },
+    "HK": {
+      "display_name": "Hong Kong",
+      "iso_alpha2": "HK",
+      "iso_alpha3": "HKG",
+      "iso_numeric": "344",
+      "map_id": "HKG",
+      "spreadsheet_code": 2,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 2,
+          "respondents": 811
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 2,
+          "respondents": 849
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 2,
+          "respondents": 1207
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 2,
+          "respondents": 1217
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 2,
+          "respondents": 1200
+        }
+      }
+    },
+    "KR": {
+      "display_name": "Korea (South)",
+      "iso_alpha2": "KR",
+      "iso_alpha3": "KOR",
+      "iso_numeric": "410",
+      "map_id": "KOR",
+      "spreadsheet_code": 3,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 3,
+          "respondents": 1500
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 3,
+          "respondents": 1212
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 3,
+          "respondents": 1207
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 3,
+          "respondents": 1200
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 3,
+          "respondents": 1268
+        }
+      }
+    },
+    "CN": {
+      "display_name": "China",
+      "iso_alpha2": "CN",
+      "iso_alpha3": "CHN",
+      "iso_numeric": "156",
+      "map_id": "CHN",
+      "spreadsheet_code": 4,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 4,
+          "respondents": 3183
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 4,
+          "respondents": 5098
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 4,
+          "respondents": 3473
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 4,
+          "respondents": 4068
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 4,
+          "respondents": 4941
+        }
+      }
+    },
+    "MN": {
+      "display_name": "Mongolia",
+      "iso_alpha2": "MN",
+      "iso_alpha3": "MNG",
+      "iso_numeric": "496",
+      "map_id": "MNG",
+      "spreadsheet_code": 5,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 5,
+          "respondents": 1144
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 5,
+          "respondents": 1211
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 5,
+          "respondents": 1210
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 5,
+          "respondents": 1228
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 5,
+          "respondents": 1284
+        }
+      }
+    },
+    "PH": {
+      "display_name": "Philippines",
+      "iso_alpha2": "PH",
+      "iso_alpha3": "PHL",
+      "iso_numeric": "608",
+      "map_id": "PHL",
+      "spreadsheet_code": 6,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 6,
+          "respondents": 1200
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 6,
+          "respondents": 1200
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 6,
+          "respondents": 1200
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 6,
+          "respondents": 1200
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 6,
+          "respondents": 1200
+        }
+      }
+    },
+    "TW": {
+      "display_name": "Taiwan",
+      "iso_alpha2": "TW",
+      "iso_alpha3": "TWN",
+      "iso_numeric": "158",
+      "map_id": "TWN",
+      "spreadsheet_code": 7,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 7,
+          "respondents": 1415
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 7,
+          "respondents": 1587
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 7,
+          "respondents": 1592
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 7,
+          "respondents": 1657
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 7,
+          "respondents": 1259
+        }
+      }
+    },
+    "TH": {
+      "display_name": "Thailand",
+      "iso_alpha2": "TH",
+      "iso_alpha3": "THA",
+      "iso_numeric": "764",
+      "map_id": "THA",
+      "spreadsheet_code": 8,
+      "waves_present": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave1": {
+          "variable": "country",
+          "code": 8,
+          "respondents": 1546
+        },
+        "wave2": {
+          "variable": "country",
+          "code": 8,
+          "respondents": 1546
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 8,
+          "respondents": 1512
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 8,
+          "respondents": 1200
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 8,
+          "respondents": 1200
+        }
+      }
+    },
+    "ID": {
+      "display_name": "Indonesia",
+      "iso_alpha2": "ID",
+      "iso_alpha3": "IDN",
+      "iso_numeric": "360",
+      "map_id": "IDN",
+      "spreadsheet_code": 9,
+      "waves_present": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave2": {
+          "variable": "country",
+          "code": 9,
+          "respondents": 1598
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 9,
+          "respondents": 1550
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 9,
+          "respondents": 1550
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 9,
+          "respondents": 1540
+        }
+      }
+    },
+    "SG": {
+      "display_name": "Singapore",
+      "iso_alpha2": "SG",
+      "iso_alpha3": "SGP",
+      "iso_numeric": "702",
+      "map_id": "SGP",
+      "spreadsheet_code": 10,
+      "waves_present": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave2": {
+          "variable": "country",
+          "code": 10,
+          "respondents": 1012
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 10,
+          "respondents": 1000
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 10,
+          "respondents": 1039
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 10,
+          "respondents": 1002
+        }
+      }
+    },
+    "VN": {
+      "display_name": "Vietnam",
+      "iso_alpha2": "VN",
+      "iso_alpha3": "VNM",
+      "iso_numeric": "704",
+      "map_id": "VNM",
+      "spreadsheet_code": 11,
+      "waves_present": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave2": {
+          "variable": "country",
+          "code": 11,
+          "respondents": 1200
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 11,
+          "respondents": 1191
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 11,
+          "respondents": 1200
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 11,
+          "respondents": 1200
+        }
+      }
+    },
+    "KH": {
+      "display_name": "Cambodia",
+      "iso_alpha2": "KH",
+      "iso_alpha3": "KHM",
+      "iso_numeric": "116",
+      "map_id": "KHM",
+      "spreadsheet_code": 12,
+      "waves_present": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave2": {
+          "variable": "country",
+          "code": 12,
+          "respondents": 1000
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 12,
+          "respondents": 1200
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 12,
+          "respondents": 1200
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 12,
+          "respondents": 0
+        }
+      }
+    },
+    "MY": {
+      "display_name": "Malaysia",
+      "iso_alpha2": "MY",
+      "iso_alpha3": "MYS",
+      "iso_numeric": "458",
+      "map_id": "MYS",
+      "spreadsheet_code": 13,
+      "waves_present": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave2": {
+          "variable": "country",
+          "code": 13,
+          "respondents": 1218
+        },
+        "wave3": {
+          "variable": "country",
+          "code": 13,
+          "respondents": 1214
+        },
+        "wave4": {
+          "variable": "country",
+          "code": 13,
+          "respondents": 1207
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 13,
+          "respondents": 1237
+        }
+      }
+    },
+    "MM": {
+      "display_name": "Myanmar",
+      "iso_alpha2": "MM",
+      "iso_alpha3": "MMR",
+      "iso_numeric": "104",
+      "map_id": "MMR",
+      "spreadsheet_code": 14,
+      "waves_present": [
+        4,
+        5
+      ],
+      "wave_codes": {
+        "wave4": {
+          "variable": "country",
+          "code": 14,
+          "respondents": 1620
+        },
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 14,
+          "respondents": 1627
+        }
+      }
+    },
+    "AU": {
+      "display_name": "Australia",
+      "iso_alpha2": "AU",
+      "iso_alpha3": "AUS",
+      "iso_numeric": "036",
+      "map_id": "AUS",
+      "spreadsheet_code": 15,
+      "waves_present": [
+        5
+      ],
+      "wave_codes": {
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 15,
+          "respondents": 1630
+        }
+      }
+    },
+    "IN": {
+      "display_name": "India",
+      "iso_alpha2": "IN",
+      "iso_alpha3": "IND",
+      "iso_numeric": "356",
+      "map_id": "IND",
+      "spreadsheet_code": 18,
+      "waves_present": [
+        5
+      ],
+      "wave_codes": {
+        "wave5": {
+          "variable": "COUNTRY",
+          "code": 18,
+          "respondents": 5318
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "pipeline_version": "2.0.0",
+  "run_timestamp": "2026-03-29T22:45:13.041466+00:00",
+  "python_version": "3.14.3 (v3.14.3:323c59a5e34, Feb  3 2026, 11:41:37) [Clang 16.0.0 (clang-1600.0.26.6)]",
+  "wave_summaries": {
+    "wave1": {
+      "sav_file": "Wave1.sav",
+      "sav_hash": "ac0b8bc1ddb2fa6b",
+      "total_rows": 12217,
+      "total_variables": 217,
+      "variable_types": {
+        "ordinal": 125,
+        "binary": 58,
+        "continuous": 21,
+        "unknown": 13
+      },
+      "weight_variable": "w_all",
+      "country_variable": "country",
+      "countries_detected": {
+        "1": "Japan (N=1,418)",
+        "2": "Hong Kong (N=811)",
+        "3": "Korea (N=1,500)",
+        "4": "Mainland China (N=3,183)",
+        "5": "Mongolia (N=1,144)",
+        "6": "Philippines (N=1,200)",
+        "7": "Taiwan (N=1,415)",
+        "8": "Thailand (N=1,546)"
+      }
+    },
+    "wave2": {
+      "sav_file": "Wave2.sav",
+      "sav_hash": "240b07ab2c490a34",
+      "total_rows": 19798,
+      "total_variables": 252,
+      "variable_types": {
+        "ordinal": 176,
+        "binary": 52,
+        "continuous": 16,
+        "unknown": 8
+      },
+      "weight_variable": "w_all",
+      "country_variable": "country",
+      "countries_detected": {
+        "1": "Japan (N=1,067)",
+        "2": "Hong Kong (N=849)",
+        "3": "Korea (N=1,212)",
+        "4": "Mainland China (N=5,098)",
+        "5": "Mongolia (N=1,211)",
+        "6": "Philippines (N=1,200)",
+        "7": "Taiwan (N=1,587)",
+        "8": "Thailand (N=1,546)",
+        "9": "Indonesia (N=1,598)",
+        "10": "Singapore (N=1,012)",
+        "11": "Vietnam (N=1,200)",
+        "12": "Cambodia (N=1,000)",
+        "13": "Malaysia (N=1,218)"
+      }
+    },
+    "wave3": {
+      "sav_file": "Wave3.sav",
+      "sav_hash": "6bd3b042deac95d2",
+      "total_rows": 19436,
+      "total_variables": 272,
+      "variable_types": {
+        "ordinal": 184,
+        "binary": 52,
+        "continuous": 16,
+        "unknown": 20
+      },
+      "weight_variable": "allweight",
+      "country_variable": "country",
+      "countries_detected": {
+        "-1": "Missing (N=0)",
+        "1": "Japan (N=1,880)",
+        "2": "Hong Kong (N=1,207)",
+        "3": "Korea (N=1,207)",
+        "4": "Mainland China (N=3,473)",
+        "5": "Mongolia (N=1,210)",
+        "6": "Philippines (N=1,200)",
+        "7": "Taiwan (N=1,592)",
+        "8": "Thailand (N=1,512)",
+        "9": "Indonesia (N=1,550)",
+        "10": "Singapore (N=1,000)",
+        "11": "Vietnam (N=1,191)",
+        "12": "Cambodia (N=1,200)",
+        "13": "Malaysia (N=1,214)"
+      }
+    },
+    "wave4": {
+      "sav_file": "Wave4.sav",
+      "sav_hash": "46d1aaa757c6b462",
+      "total_rows": 20667,
+      "total_variables": 289,
+      "variable_types": {
+        "ordinal": 207,
+        "binary": 46,
+        "continuous": 20,
+        "unknown": 16
+      },
+      "weight_variable": "w",
+      "country_variable": "country",
+      "countries_detected": {
+        "1": "Japan (N=1,081)",
+        "2": "Hong Kong (N=1,217)",
+        "3": "Korea (N=1,200)",
+        "4": "China (N=4,068)",
+        "5": "Mongolia (N=1,228)",
+        "6": "Philippines (N=1,200)",
+        "7": "Taiwan (N=1,657)",
+        "8": "Thailand (N=1,200)",
+        "9": "Indonesia (N=1,550)",
+        "10": "Singapore (N=1,039)",
+        "11": "Vietnam (N=1,200)",
+        "12": "Cambodia (N=1,200)",
+        "13": "Malaysia (N=1,207)",
+        "14": "Myanmar (N=1,620)"
+      }
+    },
+    "wave5": {
+      "sav_file": "Wave5.sav",
+      "sav_hash": "2576e428ff8de3c8",
+      "total_rows": 26951,
+      "total_variables": 308,
+      "variable_types": {
+        "ordinal": 216,
+        "binary": 54,
+        "continuous": 28,
+        "unknown": 10
+      },
+      "weight_variable": "w",
+      "country_variable": "COUNTRY",
+      "countries_detected": {
+        "1": "Japan (N=1,045)",
+        "2": "Hong Kong (N=1,200)",
+        "3": "Korea (N=1,268)",
+        "4": "China (N=4,941)",
+        "5": "Mongolia (N=1,284)",
+        "6": "Philippines (N=1,200)",
+        "7": "Taiwan (N=1,259)",
+        "8": "Thailand (N=1,200)",
+        "9": "Indonesia (N=1,540)",
+        "10": "Singapore (N=1,002)",
+        "11": "Vietnam (N=1,200)",
+        "12": "Cambodia (N=0)",
+        "13": "Malaysia (N=1,237)",
+        "14": "Myanmar (N=1,627)",
+        "15": "Australia (N=1,630)",
+        "18": "India (N=5,318)"
+      }
+    }
+  },
+  "harmonization_summary": {
+    "total_harmonized": 136,
+    "time_series_count": 107,
+    "concepts_in_all_5_waves": 62,
+    "concepts_with_reversals": 102,
+    "by_category": {
+      "Economic Evaluations": 11,
+      "Trust in Institutions": 11,
+      "Social Capital": 5,
+      "Participation in Elections": 5,
+      "Access to Public Service": 2,
+      "Psychological Involvement": 3,
+      "Partisanship": 1,
+      "Traditionalism": 12,
+      "Political Participation": 4,
+      "Regime & Democracy": 40,
+      "Citizen Empowerment": 5,
+      "Authoritarian/Democratic Values": 10,
+      "International Relations": 7,
+      "Citizenship": 2,
+      "Demographic Information": 18
+    }
+  }
+}
