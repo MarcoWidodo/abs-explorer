@@ -42,5 +42,10 @@
     "globals": "^17.4.0",
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.1"
+  },
+  "overrides": {
+    "react-simple-maps": {
+      "react": "$react"
+    }
   }
 }
