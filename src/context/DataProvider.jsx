@@ -1,128 +1,121 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 
-const DataContext = createContext()
+/* ─────────────────────────────────────────────────────────────
+   Data layer. Only manifest.json (~10 KB) is fetched at start-up.
+   Everything else is fetched per variable when a view needs it, cached for
+   the session, and de-duplicated if two components ask at once.
+   ───────────────────────────────────────────────────────────── */
 
-const cache = {}
+const BASE = `${import.meta.env.BASE_URL}data`
+const cache = new Map()
 
-async function fetchJSON(path) {
-  if (cache[path]) return cache[path]
-  const res = await fetch(path)
-  if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`)
-  const data = await res.json()
-  cache[path] = data
-  return data
+function fetchJSON(path) {
+  const url = `${BASE}/${path}`
+  if (!cache.has(url)) {
+    const p = fetch(url).then(r => {
+      if (!r.ok) throw new Error(`${r.status} loading ${path}`)
+      return r.json()
+    })
+    p.catch(() => cache.delete(url))
+    cache.set(url, p)
+  }
+  return cache.get(url)
 }
 
-export function DataProvider({ children }) {
-  // Global data (loaded at startup)
-  const [countryRegistry, setCountryRegistry] = useState(null)
-  const [harmonization, setHarmonization] = useState(null)
-  const [timeseries, setTimeseries] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+export const api = {
+  manifest: () => fetchJSON('manifest.json'),
+  waveIndex: (w) => fetchJSON(`waves/w${w}/index.json`),
+  variable: (w, id) => fetchJSON(`waves/w${w}/v/${id}.json`),
+  correlations: (w, id) => fetchJSON(`waves/w${w}/r/${id}.json`),
+  trendIndex: () => fetchJSON('trends/index.json'),
+  trend: (id) => fetchJSON(`trends/${id}.json`),
+  geoWorld: () => fetchJSON('geo/world-110m.json'),
+  geoRegion: () => fetchJSON('geo/region-50m.json'),
+}
 
-  // Per-wave data (loaded on demand)
-  const [waveMetadata, setWaveMetadata] = useState({})
-  const [waveDistributions, setWaveDistributions] = useState({})
-  const [waveCorrelations, setWaveCorrelations] = useState({})
-
-  // Load global data at startup
+/**
+ * useResource(loader, deps): { data, loading, error } for any api call.
+ * `loader` returns a promise (or null to skip). Stale responses are ignored.
+ */
+export function useResource(loader, deps) {
+  const [state, setState] = useState({ data: null, loading: false, error: null })
   useEffect(() => {
-    async function init() {
-      try {
-        const [cr, harm, ts] = await Promise.all([
-          fetchJSON('/data/country_registry.json'),
-          fetchJSON('/data/harmonization.json'),
-          fetchJSON('/data/harmonized_timeseries.json'),
-        ])
-        setCountryRegistry(cr)
-        setHarmonization(harm)
-        setTimeseries(ts)
-      } catch (err) {
-        console.error('Failed to load global data:', err)
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-    init()
-  }, [])
+    const p = loader()
+    if (!p) { setState({ data: null, loading: false, error: null }); return }
+    let live = true
+    setState(s => ({ data: s.data, loading: true, error: null }))
+    p.then(data => live && setState({ data, loading: false, error: null }))
+     .catch(error => live && setState({ data: null, loading: false, error }))
+    return () => { live = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
+  return state
+}
 
-  // Load wave metadata on demand
-  const loadWaveMetadata = useCallback(async (waveNum) => {
-    if (waveMetadata[waveNum]) return waveMetadata[waveNum]
-    const data = await fetchJSON(`/data/wave${waveNum}_metadata.json`)
-    setWaveMetadata(prev => ({ ...prev, [waveNum]: data }))
-    return data
-  }, [waveMetadata])
-
-  // Load wave distributions on demand
-  const loadWaveDistributions = useCallback(async (waveNum) => {
-    if (waveDistributions[waveNum]) return waveDistributions[waveNum]
-    const data = await fetchJSON(`/data/wave${waveNum}_distributions.json`)
-    setWaveDistributions(prev => ({ ...prev, [waveNum]: data }))
-    return data
-  }, [waveDistributions])
-
-  // Load wave correlations on demand
-  const loadWaveCorrelations = useCallback(async (waveNum) => {
-    if (waveCorrelations[waveNum]) return waveCorrelations[waveNum]
-    const data = await fetchJSON(`/data/wave${waveNum}_correlations.json`)
-    setWaveCorrelations(prev => ({ ...prev, [waveNum]: data }))
-    return data
-  }, [waveCorrelations])
-
-  // Helper: get country display name
-  const getCountryName = useCallback((code) => {
-    if (!countryRegistry) return code
-    return countryRegistry.countries?.[code]?.display_name || code
-  }, [countryRegistry])
-
-  // Helper: get country color CSS variable
-  const getCountryColor = useCallback((code) => {
-    return `var(--country-${code})`
-  }, [])
-
-  // Helper: list countries for a wave
-  const getWaveCountries = useCallback((waveNum) => {
-    if (!countryRegistry) return []
-    return Object.entries(countryRegistry.countries)
-      .filter(([, info]) => info.waves_present.includes(waveNum))
-      .map(([code, info]) => ({ code, name: info.display_name }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [countryRegistry])
-
-  return (
-    <DataContext.Provider value={{
-      // Global data
-      countryRegistry,
-      harmonization,
-      timeseries,
-      loading,
-      error,
-
-      // Per-wave loaders
-      loadWaveMetadata,
-      loadWaveDistributions,
-      loadWaveCorrelations,
-
-      // Per-wave cached data
-      waveMetadata,
-      waveDistributions,
-      waveCorrelations,
-
-      // Helpers
-      getCountryName,
-      getCountryColor,
-      getWaveCountries,
-    }}>
-      {children}
-    </DataContext.Provider>
+/** Several variables at once (e.g. both axes of a scatter plot). */
+export function useVariables(wave, ids) {
+  const key = ids.filter(Boolean).join('|')
+  return useResource(
+    () => (key ? Promise.all(ids.map(id => (id ? api.variable(wave, id) : null))) : null),
+    [wave, key]
   )
 }
 
-export function useABSData() {
+const DataContext = createContext(null)
+
+export function DataProvider({ children }) {
+  const [manifest, setManifest] = useState(null)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    api.manifest().then(setManifest).catch(e => setError(e.message))
+  }, [])
+
+  const helpers = useMemo(() => {
+    if (!manifest) return {}
+    const countries = manifest.countries
+    const byName = (a, b) => countries[a].name.localeCompare(countries[b].name)
+    const groupLabels = { all: 'All respondents' }
+    manifest.subgroups.forEach(s => s.groups.forEach(g => { groupLabels[g.id] = g.label }))
+    const waveById = Object.fromEntries(manifest.waves.map(w => [w.id, w]))
+    return {
+      countryName: (iso) => countries[iso]?.name || iso,
+      countryColor: (iso) => `var(--country-${iso})`,
+      iso3: (iso) => countries[iso]?.iso3 || iso,
+      allCountries: Object.keys(countries).sort(byName),
+      waveCountries: (w) => [...(waveById[w]?.countries || [])].sort(byName),
+      wave: (w) => waveById[w],
+      waveLabel: (w) => waveById[w] ? `${waveById[w].label} (${waveById[w].years})` : `Wave ${w}`,
+      fieldworkYear: (iso, w) => countries[iso]?.waves?.[w]?.year ?? null,
+      groupLabel: (g) => groupLabels[g] || g,
+      countrySet: (id) => manifest.country_sets.find(s => s.id === id),
+      sortByName: (list) => [...list].sort(byName),
+    }
+  }, [manifest])
+
+  const value = useMemo(() => ({ manifest, error, loading: !manifest && !error, ...helpers }),
+    [manifest, error, helpers])
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>
+}
+
+export function useData() {
   const ctx = useContext(DataContext)
-  if (!ctx) throw new Error('useABSData must be inside DataProvider')
+  if (!ctx) throw new Error('useData must be used inside DataProvider')
   return ctx
+}
+
+/** Source line used under every chart and in every export. */
+export function useSourceNote() {
+  const { manifest } = useData()
+  return useCallback(({ waves, base, weighted = true, set, extra } = {}) => {
+    if (!manifest) return ''
+    const parts = [`Source: ${manifest.survey.name}${waves ? `, ${waves}` : ''}.`]
+    if (weighted) parts.push('Weighted within country.')
+    if (base === 'valid') parts.push("Don't know / can't choose / decline excluded from the base.")
+    if (base === 'asked') parts.push("Don't know / can't choose / decline included in the base.")
+    if (set) parts.push(set)
+    if (extra) parts.push(extra)
+    return parts.join(' ')
+  }, [manifest])
 }

@@ -1,29 +1,19 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
-const WAVES = [
-  { num: 1, label: 'Wave 1', years: '2001–03' },
-  { num: 2, label: 'Wave 2', years: '2005–08' },
-  { num: 3, label: 'Wave 3', years: '2010–12' },
-  { num: 4, label: 'Wave 4', years: '2014–16' },
-  { num: 5, label: 'Wave 5', years: '2018–21' },
-]
+import { useData } from '../../context/DataProvider'
 
-export default function WaveDotMatrix({ countryRegistry }) {
+export default function WaveDotMatrix() {
+  const { manifest } = useData()
+  const WAVES = manifest.waves.map(w => ({ num: w.id, label: w.label, years: w.years }))
   const [hoveredWave, setHoveredWave] = useState(null)
   const [hoveredCountry, setHoveredCountry] = useState(null)
 
   // Build sorted country list with wave presence
-  const countries = useMemo(() => {
-    if (!countryRegistry?.countries) return []
-    return Object.entries(countryRegistry.countries)
-      .map(([code, info]) => ({
-        code,
-        name: info.display_name,
-        waves: info.waves_present || [],
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [countryRegistry])
+  const countries = useMemo(() => Object.entries(manifest.countries)
+      .map(([code, info]) => ({ code, name: info.name, waves: Object.keys(info.waves).map(Number),
+                                n: info.waves }))
+      .sort((a, b) => a.name.localeCompare(b.name)), [manifest])
 
   // Countries for hovered wave (for tooltip)
   const hoveredWaveCountries = useMemo(() => {
@@ -33,7 +23,7 @@ export default function WaveDotMatrix({ countryRegistry }) {
 
   return (
     <div className="dot-matrix-wrap">
-      <div className="dot-matrix">
+      <div className="dot-matrix" style={{ '--n-waves': WAVES.length }}>
         {/* Header row: wave labels */}
         <div className="dot-matrix-corner" />
         {WAVES.map(w => (
@@ -112,6 +102,7 @@ export default function WaveDotMatrix({ countryRegistry }) {
                 <div
                   key={w.num}
                   className={`dot-matrix-cell${isHighlighted ? ' highlighted' : ''}${isDimmed ? ' dimmed' : ''}`}
+                  title={present ? `${c.name}, ${w.label}: ${c.n[w.num].year}, N = ${c.n[w.num].n.toLocaleString('en-US')}` : `${c.name}: not surveyed in ${w.label}`}
                 >
                   <motion.div
                     className={`dot-matrix-dot${present ? ' filled' : ' empty'}`}

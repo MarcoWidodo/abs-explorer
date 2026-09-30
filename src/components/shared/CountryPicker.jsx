@@ -1,48 +1,37 @@
-import { useMemo } from 'react'
+import { useData } from '../../context/DataProvider'
 
-export default function CountryPicker({ countries, selected, onChange }) {
-  // countries = [{ code: 'JP', name: 'Japan' }, ...]
-  const sorted = useMemo(() =>
-    [...countries].sort((a, b) => a.name.localeCompare(b.name)),
-    [countries]
-  )
-
+/**
+ * Country chips. `available` = ISO2 codes that can be chosen; others are shown disabled
+ * (e.g. countries where the question was not asked).
+ */
+export default function CountryPicker({ countries, available, selected, onChange, label = 'Countries', max }) {
+  const { countryName } = useData()
+  const avail = new Set(available || countries)
   function toggle(code) {
-    if (selected.includes(code)) {
-      onChange(selected.filter(c => c !== code))
-    } else {
-      onChange([...selected, code])
-    }
+    if (!avail.has(code)) return
+    if (selected.includes(code)) onChange(selected.filter(c => c !== code))
+    else if (!max || selected.length < max) onChange([...selected, code])
   }
-
-  function selectAll() { onChange(sorted.map(c => c.code)) }
-  function clearAll() { onChange([]) }
-
   return (
     <div className="country-picker">
       <div className="country-picker-header">
-        <label className="picker-label">Countries</label>
+        <label className="picker-label">{label}{max ? <span className="picker-label-hint"> (up to {max})</span> : null}</label>
         <div className="country-picker-actions">
-          <button className="country-action-btn" onClick={selectAll}>All</button>
-          <button className="country-action-btn" onClick={clearAll}>None</button>
+          {!max && <button className="country-action-btn" onClick={() => onChange(countries.filter(c => avail.has(c)))}>All</button>}
+          <button className="country-action-btn" onClick={() => onChange([])}>None</button>
         </div>
       </div>
-
       <div className="country-grid">
-        {sorted.map(({ code, name }) => {
-          const isSelected = selected.includes(code)
+        {countries.map(code => {
+          const on = selected.includes(code)
+          const dis = !avail.has(code)
           return (
-            <button
-              key={code}
-              className={`country-chip${isSelected ? ' active' : ''}`}
-              onClick={() => toggle(code)}
-              style={{
-                '--chip-color': `var(--country-${code})`,
-              }}
-            >
+            <button key={code} className={`country-chip${on ? ' active' : ''}${dis ? ' disabled' : ''}`} onClick={() => toggle(code)}
+                    disabled={dis} aria-pressed={on} title={dis ? `${countryName(code)}: not asked` : countryName(code)}
+                    style={{ '--chip-color': `var(--country-${code})` }}>
               <span className="country-chip-dot" />
               <span className="country-chip-code">{code}</span>
-              <span className="country-chip-name">{name}</span>
+              <span className="country-chip-name">{countryName(code)}</span>
             </button>
           )
         })}

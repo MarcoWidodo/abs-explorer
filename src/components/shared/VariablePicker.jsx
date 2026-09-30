@@ -1,126 +1,68 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Search, ChevronDown } from 'lucide-react'
 
-export default function VariablePicker({ metadata, value, onChange, label = 'Variable' }) {
+export const TYPE_LABEL = { ordinal: 'scale', binary: 'two answers', continuous: 'numeric', nominal: 'categories' }
+
+/**
+ * Searchable, sectioned picker.
+ * items: [{ id, q (question text), s (section), t (type), code (display id) }]
+ * sections: section names in questionnaire order
+ */
+export default function VariablePicker({ items, sections, value, onChange, label = 'Variable', showType = true }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('_all')
+  const [section, setSection] = useState('_all')
   const ref = useRef(null)
 
-  // Close on click outside
   useEffect(() => {
-    function handler(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    function onDown(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    function onKey(e) { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
   }, [])
 
-  // Build category → variables map from metadata
-  const { categories, variableList } = useMemo(() => {
-    if (!metadata?.variables) return { categories: [], variableList: [] }
-
-    const catMap = {}
-    const allVars = []
-
-    for (const [varName, info] of Object.entries(metadata.variables)) {
-      const cat = info.category || 'Other'
-      if (!catMap[cat]) catMap[cat] = []
-      const entry = { name: varName, label: info.label || varName, category: cat }
-      catMap[cat].push(entry)
-      allVars.push(entry)
-    }
-
-    // Sort categories, put "Other" and system categories at end
-    const sortedCats = Object.keys(catMap).sort((a, b) => {
-      const aIsSystem = ['Other', 'Socio-Economic Background', 'Interview Record'].includes(a)
-      const bIsSystem = ['Other', 'Socio-Economic Background', 'Interview Record'].includes(b)
-      if (aIsSystem !== bIsSystem) return aIsSystem ? 1 : -1
-      return a.localeCompare(b)
-    })
-
-    return { categories: sortedCats, variableList: allVars }
-  }, [metadata])
-
-  // Filter by category and search
+  const secs = useMemo(() => (sections || [...new Set(items.map(i => i.s))]).filter(s => items.some(i => i.s === s)), [items, sections])
   const filtered = useMemo(() => {
-    let vars = variableList
-    if (selectedCategory !== '_all') {
-      vars = vars.filter(v => v.category === selectedCategory)
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      vars = vars.filter(v =>
-        v.name.toLowerCase().includes(q) ||
-        v.label.toLowerCase().includes(q)
-      )
-    }
-    return vars
-  }, [variableList, selectedCategory, search])
+    let list = section === '_all' ? items : items.filter(i => i.s === section)
+    const q = search.trim().toLowerCase()
+    if (q) list = list.filter(i => (i.code || i.id).toLowerCase().includes(q) || i.q.toLowerCase().includes(q))
+    return list
+  }, [items, section, search])
 
-  const selectedVar = metadata?.variables?.[value]
-  const displayText = selectedVar
-    ? `${value} — ${selectedVar.label || ''}`
-    : 'Select a variable…'
+  const sel = items.find(i => i.id === value)
 
   return (
     <div className="picker-wrap" ref={ref}>
       <label className="picker-label">{label}</label>
-
-      {/* Trigger button */}
-      <button className="picker-trigger" onClick={() => setOpen(!open)}>
-        <span className="picker-trigger-text">{displayText}</span>
+      <button className="picker-trigger" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="listbox">
+        <span className="picker-trigger-text">
+          {sel ? <>{sel.code !== null && <span className="picker-trigger-code">{sel.code || sel.id}</span>}{sel.q}</> : 'Select…'}
+        </span>
         <ChevronDown size={15} className={`picker-chevron${open ? ' open' : ''}`} />
       </button>
-
-      {/* Dropdown */}
       {open && (
         <div className="picker-dropdown">
-          {/* Search */}
           <div className="picker-search-wrap">
             <Search size={14} style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
-            <input
-              type="text"
-              className="picker-search"
-              placeholder="Search variables…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              autoFocus
-            />
+            <input type="text" className="picker-search" placeholder="Search question text or number…" value={search}
+                   onChange={e => setSearch(e.target.value)} autoFocus />
           </div>
-
-          {/* Category filter */}
           <div className="picker-categories">
-            <button
-              className={`picker-cat-btn${selectedCategory === '_all' ? ' active' : ''}`}
-              onClick={() => setSelectedCategory('_all')}
-            >
-              All ({variableList.length})
-            </button>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                className={`picker-cat-btn${selectedCategory === cat ? ' active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
+            <button className={`picker-cat-btn${section === '_all' ? ' active' : ''}`} onClick={() => setSection('_all')}>All ({items.length})</button>
+            {secs.map(s => (
+              <button key={s} className={`picker-cat-btn${section === s ? ' active' : ''}`} onClick={() => setSection(s)}>{s}</button>
             ))}
           </div>
-
-          {/* Variable list */}
-          <div className="picker-list">
-            {filtered.length === 0 && (
-              <div className="picker-empty">No variables match your search.</div>
-            )}
-            {filtered.map(v => (
-              <button
-                key={v.name}
-                className={`picker-option${v.name === value ? ' active' : ''}`}
-                onClick={() => { onChange(v.name); setOpen(false); setSearch('') }}
-              >
-                <span className="picker-option-name">{v.name}</span>
-                <span className="picker-option-label">{v.label}</span>
+          <div className="picker-list" role="listbox">
+            {filtered.length === 0 && <div className="picker-empty">No questions match.</div>}
+            {filtered.map(i => (
+              <button key={i.id} role="option" aria-selected={i.id === value}
+                      className={`picker-option${i.id === value ? ' active' : ''}`}
+                      onClick={() => { onChange(i.id); setOpen(false); setSearch('') }}>
+                {i.code !== null && <span className="picker-option-name">{i.code || i.id}</span>}
+                <span className="picker-option-label">{i.q}</span>
+                {showType && i.t && <span className="picker-option-type">{TYPE_LABEL[i.t] || i.t}</span>}
               </button>
             ))}
           </div>

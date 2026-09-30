@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { BarChart3, TrendingUp, Globe2, GitCompareArrows, ArrowRight } from 'lucide-react'
-import { useABSData } from '../context/DataProvider'
+import { useData } from '../context/DataProvider'
 import GlobeCanvas from '../components/shared/GlobeCanvas'
 import WaveDotMatrix from '../components/shared/WaveDotMatrix'
 
@@ -10,28 +10,28 @@ const FEATURES = [
   {
     icon: BarChart3,
     title: 'Single-Wave Explorer',
-    desc: 'Browse response distributions for any survey variable, comparing across countries side by side.',
+    desc: 'Answers to any question in any wave, compared across countries and by gender, age, education and urban/rural.',
     path: '/explore',
     color: 'var(--chart-1)',
   },
   {
     icon: TrendingUp,
     title: 'Time-Series Explorer',
-    desc: 'Track 107 harmonized variables across five waves of surveys spanning two decades.',
+    desc: 'Harmonized questions on one scale across all six waves, by fieldwork year, with regional averages.',
     path: '/trends',
     color: 'var(--chart-3)',
   },
   {
     icon: Globe2,
     title: 'Choropleth Map',
-    desc: 'Visualize country-level averages across the Asia-Pacific on an interactive map.',
+    desc: 'One number per country, from any question in any wave, on a map of the region.',
     path: '/map',
     color: 'var(--chart-4)',
   },
   {
     icon: GitCompareArrows,
     title: 'Correlations Explorer',
-    desc: 'Analyze relationships between variables at both country and individual levels.',
+    desc: 'How two questions move together, across countries or among respondents within a country.',
     path: '/correlations',
     color: 'var(--chart-5)',
   },
@@ -74,7 +74,11 @@ function CountUp({ target, duration = 1.5 }) {
 /* ── Main Home component ── */
 export default function Home() {
   const navigate = useNavigate()
-  const { countryRegistry } = useABSData()
+  const { manifest } = useData()
+  const nWaves = manifest.waves.length
+  const totalN = manifest.waves.reduce((s, w) => s + w.n, 0)
+  const years = Object.values(manifest.countries).flatMap(c => Object.values(c.waves).map(w => w.year))
+  const y0 = Math.min(...years), y1 = Math.max(...years)
   const heroRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
@@ -85,7 +89,7 @@ export default function Home() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
   const heroY = useTransform(scrollYProgress, [0, 0.7], ['0%', '12%'])
 
-  const totalCountries = countryRegistry ? Object.keys(countryRegistry.countries).length : 16
+  const totalCountries = Object.keys(manifest.countries).length
 
   return (
     <div className="dock-clearance">
@@ -115,7 +119,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.7, ease: [0.25, 0.4, 0.25, 1] }}
             >
-              Asian Barometer{' '}
+              {manifest.survey.name.replace(/ Survey$/, '')}{' '}
               <span className="hero-title-accent">Survey Explorer</span>
             </motion.h1>
 
@@ -125,9 +129,9 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55, duration: 0.6 }}
             >
-              Explore two decades of public opinion data across {totalCountries} countries
-              in Asia and the Pacific — democratic values, institutional trust,
-              political participation, and economic perceptions.
+              Explore {y1 - y0 + 1} years of public opinion ({y0}–{y1}) from {totalN.toLocaleString('en-US')} interviews
+              in {totalCountries} countries in {manifest.survey.region}: democratic values, institutional trust,
+              political participation and economic perceptions.
             </motion.p>
 
             <motion.div
@@ -150,7 +154,7 @@ export default function Home() {
               transition={{ delay: 1.0, duration: 0.8 }}
             >
               <div className="hero-stat">
-                <span className="hero-stat-num"><CountUp target={5} duration={1} /></span>
+                <span className="hero-stat-num"><CountUp target={nWaves} duration={1} /></span>
                 <span className="hero-stat-label">Survey Waves</span>
               </div>
               <div className="hero-stat-divider" />
@@ -160,8 +164,8 @@ export default function Home() {
               </div>
               <div className="hero-stat-divider" />
               <div className="hero-stat">
-                <span className="hero-stat-num"><CountUp target={20} duration={1.4} /></span>
-                <span className="hero-stat-label">Years of Data</span>
+                <span className="hero-stat-num"><CountUp target={Math.round(totalN / 1000)} duration={1.4} />k</span>
+                <span className="hero-stat-label">Interviews</span>
               </div>
             </motion.div>
           </div>
@@ -188,7 +192,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.6 }}
           >
-            Five Waves of Data
+            {nWaves === 6 ? 'Six' : nWaves} Waves of Data
           </motion.h2>
 
           <motion.p
@@ -198,7 +202,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ delay: 0.15, duration: 0.6 }}
           >
-            Survey coverage across 16 countries from 2001 to 2021. Hover to explore.
+            Survey coverage across {totalCountries} countries, {y0}–{y1}. Hover a dot for the fieldwork year and sample size.
           </motion.p>
 
           <motion.div
@@ -207,7 +211,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ delay: 0.25, duration: 0.6 }}
           >
-            <WaveDotMatrix countryRegistry={countryRegistry} />
+            <WaveDotMatrix />
           </motion.div>
         </div>
       </section>
@@ -262,13 +266,10 @@ export default function Home() {
         transition={{ duration: 0.6 }}
       >
         <p>
-          Data source: The Asian Barometer Survey is coordinated by the
-          Institute of Political Science, Academia Sinica, Taipei.
-          Visit{' '}
-          <a href="https://www.asianbarometer.org" target="_blank" rel="noopener noreferrer">
-            asianbarometer.org
-          </a>{' '}
-          for more information.
+          Data source: {manifest.survey.attribution} Visit{' '}
+          <a href={manifest.survey.url} target="_blank" rel="noopener noreferrer">{manifest.survey.url.replace(/^https?:\/\/(www\.)?/, '')}</a>{' '}
+          for more information. How the numbers on this site are computed: <Link to="/about">About the data</Link>.
+          Data built {manifest.built}.
         </p>
       </motion.section>
     </div>

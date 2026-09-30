@@ -1,177 +1,118 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { ChevronDown } from 'lucide-react'
-import { useABSData } from '../context/DataProvider'
-import WaveSelector from '../components/shared/WaveSelector'
+import { useState, useEffect, useMemo } from 'react'
+import { useData, useResource, api, useSourceNote } from '../context/DataProvider'
 import VariablePicker from '../components/shared/VariablePicker'
-import ChoroplethMap, { COLOR_SCHEMES } from '../components/shared/ChoroplethMap'
 import DetailPanel from '../components/shared/DetailPanel'
-import ExportBar from '../components/shared/ExportBar'
-import { exportPNG, exportCSV } from '../utils/exportUtils'
+import { WaveSelector, IndicatorControl, BaseControl, ExportBar, ChartPanel, Select, Checkbox } from '../components/shared/Controls'
+import ChoroplethMap, { COLOR_SCHEMES } from '../components/charts/ChoroplethMap'
+import { cellValue, fmtValue, fmtN } from '../lib/stats'
+import { useChartExport, capFirst, questionText } from '../lib/useChartExport'
+import { defaultIndicator, indicatorLabel } from '../lib/indicators'
 
 export default function MapExplorer() {
-  const {
-    loadWaveMetadata, loadWaveDistributions,
-    waveMetadata, waveDistributions,
-    getCountryName,
-  } = useABSData()
-
-  const [wave, setWave] = useState(3)
-  const [variable, setVariable] = useState(null)
-  const [colorScheme, setColorScheme] = useState('Yellow → Red')
+  const { manifest, countryName, countryColor, iso3, wave: waveInfo, groupLabel } = useData()
+  const sourceNote = useSourceNote()
+  const [wave, setWave] = useState(manifest.waves[manifest.waves.length - 1].id)
+  const [varId, setVarId] = useState(null)
+  const [base, setBase] = useState('valid')
+  const [metric, setMetric] = useState('share')
+  const [codesSel, setCodesSel] = useState([])
+  const [group, setGroup] = useState('all')
+  const [scheme, setScheme] = useState('Yellow → Red')
   const [flipped, setFlipped] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const chartRef = useRef(null)
 
-  // Load wave data
+  const { data: index } = useResource(() => api.waveIndex(wave), [wave])
+  const { data: rec } = useResource(() => (varId ? api.variable(wave, varId) : null), [wave, varId])
+  const { data: geo } = useResource(() => api.geoRegion(), [])
+  const entry = index?.vars.find(v => v.id === varId)
+
   useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      try {
-        await Promise.all([
-          loadWaveMetadata(wave),
-          loadWaveDistributions(wave),
-        ])
-      } catch (err) {
-        console.error('Failed to load wave data:', err)
-      }
-      if (!cancelled) setLoading(false)
+    if (!index) return
+    if (varId && index.vars.some(v => v.id === varId)) return
+    const first = index.vars.find(v => /^q0*1$/.test(v.id)) || index.vars.find(v => v.t === 'ordinal') || index.vars[0]
+    setVarId(first.id)
+  }, [index]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (rec) { const d = defaultIndicator(rec); setMetric(d.type); setCodesSel(d.codes || []) } }, [rec])
+
+  const isoByNumeric = useMemo(() => Object.fromEntries(Object.entries(manifest.countries).map(([iso, c]) => [c.iso_numeric, iso])), [manifest])
+  const allowMean = rec && rec.type !== 'nominal'
+  const indicator = metric === 'mean' && allowMean ? { type: 'mean' } : { type: 'share', codes: codesSel }
+  const codesKey = codesSel.join()
+  const values = useMemo(() => {
+    if (!rec) return {}
+    const out = {}
+    for (const c of Object.keys(rec.est)) {
+      const v = cellValue(rec.est[c][group], rec.codes, indicator, base)
+      if (v && v.n >= manifest.min_cell_n) out[c] = v
     }
-    load()
-    return () => { cancelled = true }
-  }, [wave, loadWaveMetadata, loadWaveDistributions])
+    return out
+  }, [rec, group, base, indicator.type, codesKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const metadata = waveMetadata[wave]
-  const distributions = waveDistributions[wave]
-
-  // Auto-select first variable
-  useEffect(() => {
-    if (metadata?.variables) {
-      const vars = Object.keys(metadata.variables)
-      const firstQ = vars.find(v => v.toLowerCase().startsWith('q')) || vars[0]
-      setVariable(firstQ)
-    }
-  }, [metadata])
-
-  const varInfo = metadata?.variables?.[variable]
-  const varDist = distributions?.distributions?.[variable]
-
-  // Export handlers
-  const handleExportPNG = useCallback(() => {
-    exportPNG(chartRef, `abs_map_wave${wave}_${variable || 'chart'}.png`)
-  }, [wave, variable])
-
-  const handleExportCSV = useCallback(() => {
-    if (!varDist || !varInfo) return
-    const headers = ['Country', 'Country_Code', 'Mean', 'Std', 'Median', 'Valid_N', 'Total_N']
-    const rows = []
-
-    for (const [cc, cd] of Object.entries(varDist)) {
-      if (cc === '_ALL') continue
-      if (cd.mean == null) continue
-      rows.push([
-        getCountryName(cc), cc,
-        cd.mean, cd.std, cd.median,
-        cd.valid_n, cd.total_n,
-      ])
-    }
-
-    rows.sort((a, b) => (b[2] ?? 0) - (a[2] ?? 0))
-    exportCSV(rows, headers, `abs_map_wave${wave}_${variable || 'data'}.csv`)
-  }, [varDist, varInfo, wave, variable, getCountryName])
-
-  const schemeNames = Object.keys(COLOR_SCHEMES)
+  const ranking = Object.entries(values).sort((a, b) => b[1].value - a[1].value)
+  const indLabel = rec ? indicatorLabel(indicator, rec, base) : ''
+  const w = waveInfo(wave)
+  const fmt = (v) => fmtValue(v, indicator, indicator.type === 'mean' ? 2 : 0)
+  const note = sourceNote({ waves: `${w.label} (${w.years})`, base: indicator.type === 'share' ? base : null,
+    extra: group !== 'all' ? `${groupLabel(group)} only.` : undefined })
+  const exp = useChartExport({
+    title: questionText(entry), subtitle: `${indLabel}${group !== 'all' ? ` · ${groupLabel(group)}` : ''} · ${w.label} (${w.years})`,
+    note, filename: `abs_map_w${wave}_${varId}`,
+    rows: () => ranking.map(([c, v]) => ({ indicator: indLabel, variable: varId, success_codes: indicator.codes?.join(';') ?? 'mean', base,
+      country_set: 'country', wave, year: manifest.countries[c].waves[wave]?.year, iso3: iso3(c), country: countryName(c),
+      group, value: v.value, se: v.se, n: v.n, n_countries: 1 })),
+  })
+  const items = useMemo(() => (index?.vars || []).map(v => ({ ...v, q: capFirst(v.q), code: v.id.toUpperCase() })), [index])
+  const groupOptions = [{ value: 'all', label: 'All respondents' },
+    ...manifest.subgroups.map(s => ({ group: s.label, options: s.groups.map(g => ({ value: g.id, label: g.label })) }))]
 
   return (
     <div className="view-page dock-clearance">
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <div className="view-inner">
         <div className="view-header-row animate-fade-up">
           <div>
-            <h1>Choropleth Map</h1>
-            <p className="view-subtitle">
-              Visualize country-level means on an interactive Asia-Pacific map.
-            </p>
+            <h1>Map</h1>
+            <p className="view-subtitle">One number per country, on a map of the region.</p>
           </div>
           <WaveSelector value={wave} onChange={setWave} />
         </div>
-
-        {loading ? (
-          <div className="loading-screen" style={{ minHeight: '30vh' }}>
-            <div className="spinner" />
-            <p className="loading-text">Loading Wave {wave} data…</p>
+        <div className="explorer-layout animate-fade-up stagger-1">
+          <div className="explorer-controls">
+            {index && <VariablePicker items={items} sections={index.sections} value={varId} onChange={setVarId} label="Question" />}
+            {rec && <IndicatorControl allowMean={allowMean} metric={indicator.type} onMetric={setMetric} codes={rec.codes} labels={rec.labels}
+                                      selected={codesSel} onSelected={setCodesSel}
+                                      meanHint={entry?.ends ? `Mean on the original codes: ${entry.ends[0]} … ${entry.ends[1]}.` : null} />}
+            <BaseControl value={base} onChange={setBase} />
+            <Select label="Respondents" value={group} onChange={setGroup} options={groupOptions} />
+            <Select label="Colour scale" value={scheme} onChange={setScheme} options={Object.keys(COLOR_SCHEMES).map(k => ({ value: k, label: k }))} />
+            <Checkbox checked={flipped} onChange={setFlipped} label="Reverse colour scale" />
+            <ExportBar {...exp} onPrintMode={exp.setPrintMode} disabled={!ranking.length} />
+            {entry && rec && <DetailPanel code={entry.id.toUpperCase()} question={questionText(entry)} section={entry.s} type={entry.t} rec={rec} countries={entry.c} harmonized={entry.h} />}
           </div>
-        ) : (
-          <div className="explorer-layout animate-fade-up stagger-1">
-            {/* Controls */}
-            <div className="explorer-controls">
-              <VariablePicker
-                metadata={metadata}
-                value={variable}
-                onChange={setVariable}
-              />
-
-              {/* Color scheme */}
-              <div className="picker-wrap">
-                <label className="picker-label">Color Scale</label>
-                <div className="ts-select-wrap">
-                  <select
-                    className="ts-select"
-                    value={colorScheme}
-                    onChange={e => setColorScheme(e.target.value)}
-                  >
-                    {schemeNames.map(name => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="ts-select-icon" />
+          <div className="explorer-main">
+            {!rec || !geo || !entry ? <div className="chart-empty"><div className="spinner" /></div> : (
+              <ChartPanel title={questionText(entry)} badge={`${w.label} · ${w.years}`} note={note}>
+                <div className="chart-subtitle">{indLabel}{group !== 'all' ? ` · ${groupLabel(group)}` : ''}</div>
+                <ChoroplethMap geo={geo} values={values} isoByNumeric={isoByNumeric} countryName={countryName} scheme={scheme} flipped={flipped}
+                               format={fmt} legendTitle={indLabel} printMode={exp.printMode} svgRef={exp.svgRef} ariaLabel={entry.q} />
+                <div className="map-ranking">
+                  <div className="detail-responses-label">Ranking</div>
+                  {ranking.map(([c, v], i) => (
+                    <div key={c} className="map-rank-row">
+                      <span className="map-rank-num">{i + 1}</span>
+                      <span className="stat-dot" style={{ background: countryColor(c) }} />
+                      <span className="map-rank-name">{countryName(c)}</span>
+                      <span className="map-rank-value">{fmt(v.value)}</span>
+                      <span className="map-rank-ci">{v.se != null ? `± ${fmtValue(1.96 * v.se, indicator, indicator.type === 'mean' ? 2 : 0)}` : ''}</span>
+                      <span className="map-rank-n">N = {fmtN(v.n)}</span>
+                    </div>
+                  ))}
+                  {w.countries.filter(c => !values[c]).length > 0 && (
+                    <div className="map-rank-missing">Not asked{group !== 'all' ? ' or too few respondents' : ''}: {w.countries.filter(c => !values[c]).map(countryName).join(', ')}</div>
+                  )}
                 </div>
-              </div>
-
-              {/* Flip gradient */}
-              <div className="nr-toggle">
-                <label className="nr-toggle-label">
-                  <input
-                    type="checkbox"
-                    checked={flipped}
-                    onChange={e => setFlipped(e.target.checked)}
-                    className="nr-checkbox"
-                  />
-                  <span>Flip gradient direction</span>
-                </label>
-                <span className="nr-hint">Reverse which end of the scale gets darker colors.</span>
-              </div>
-
-              <ExportBar
-                onExportPNG={handleExportPNG}
-                onExportCSV={handleExportCSV}
-                disabled={!varDist}
-              />
-
-              <DetailPanel variableInfo={varInfo} />
-            </div>
-            <div className="explorer-main">
-              {varDist ? (
-                <div ref={chartRef} className="chart-panel">
-                  <div className="chart-title-bar">
-                    <h3 className="chart-title">{varInfo?.label}</h3>
-                    <span className="chart-wave-badge">Wave {wave}</span>
-                  </div>
-
-                  <ChoroplethMap
-                    distributions={varDist}
-                    colorScheme={colorScheme}
-                    flipped={flipped}
-                    getCountryName={getCountryName}
-                  />
-                </div>
-              ) : (
-                <div className="chart-empty">
-                  <p>Select a variable to visualize on the map.</p>
-                </div>
-              )}
-            </div>
+              </ChartPanel>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

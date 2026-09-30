@@ -4,14 +4,16 @@ const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem('abs-theme')
-    if (stored) return stored === 'dark'
+    try {
+      const stored = localStorage.getItem('abs-theme')
+      if (stored) return stored === 'dark'
+    } catch { /* storage unavailable */ }
     return false // default to light theme
   })
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
-    localStorage.setItem('abs-theme', isDark ? 'dark' : 'light')
+    try { localStorage.setItem('abs-theme', isDark ? 'dark' : 'light') } catch { /* storage unavailable */ }
   }, [isDark])
 
   const toggle = useCallback(() => setIsDark(d => !d), [])

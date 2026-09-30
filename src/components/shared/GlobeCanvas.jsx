@@ -1,22 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { geoOrthographic, geoPath, geoGraticule10 } from 'd3-geo'
 import { feature } from 'topojson-client'
-
-// ISO numeric → ABS alpha-2
-const NUMERIC_TO_A2 = {
-  '392': 'JP', '344': 'HK', '410': 'KR', '156': 'CN', '496': 'MN',
-  '608': 'PH', '158': 'TW', '764': 'TH', '360': 'ID', '702': 'SG',
-  '704': 'VN', '116': 'KH', '458': 'MY', '104': 'MM', '036': 'AU',
-  '356': 'IN',
-}
+import { api, useData } from '../../context/DataProvider'
 
 // Stagger order for draw-in (roughly geographic sweep)
 const DRAW_ORDER = ['JP', 'KR', 'CN', 'HK', 'TW', 'MN', 'PH', 'VN', 'TH', 'KH', 'MM', 'MY', 'SG', 'ID', 'IN', 'AU']
 
-// Read CSS variable value from computed styles
-function getCSSColor(varName) {
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#888'
-}
 
 export default function GlobeCanvas({ width = 420, height = 420 }) {
   const canvasRef = useRef(null)
@@ -24,11 +13,12 @@ export default function GlobeCanvas({ width = 420, height = 420 }) {
   const dataRef = useRef(null)
   const [loaded, setLoaded] = useState(false)
   const hoverPause = useRef(false)
+  const { manifest } = useData()
+  const NUMERIC_TO_A2 = useRef(Object.fromEntries(Object.entries(manifest.countries).map(([iso, c]) => [c.iso_numeric, iso]))).current
 
   // Load TopoJSON once
   useEffect(() => {
-    fetch('/data/countries-50m.json')
-      .then(r => r.json())
+    api.geoWorld()
       .then(topo => {
         const countries = feature(topo, topo.objects.countries)
         const land = feature(topo, topo.objects.land)
@@ -85,12 +75,24 @@ export default function GlobeCanvas({ width = 420, height = 420 }) {
     const ROTATION_START = DRAW_IN_START + DRAW_ORDER.length * DRAW_IN_STAGGER + 800
     const ROTATION_SPEED = 0.008 // degrees per frame (~0.5°/sec at 60fps)
 
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    let visible = true
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting
+      if (visible && !animRef.current) animRef.current = requestAnimationFrame(render)
+    })
+    io.observe(canvas)
+
     function render(now) {
-      const elapsed = now - startTime
+      animRef.current = null
+      if (!visible) return
+      const elapsed = reduceMotion ? 1e9 : now - startTime
+      const cs = getComputedStyle(document.documentElement)
+      const getCSSColor = (v) => cs.getPropertyValue(v).trim() || '#888'
       ctx.clearRect(0, 0, width, height)
 
       // Slow rotation after draw-in completes
-      if (elapsed > ROTATION_START && !hoverPause.current) {
+      if (!reduceMotion && elapsed > ROTATION_START && !hoverPause.current) {
         const rot = projection.rotate()
         projection.rotate([rot[0] - ROTATION_SPEED, rot[1], rot[2]])
       }
@@ -163,6 +165,7 @@ export default function GlobeCanvas({ width = 420, height = 420 }) {
     animRef.current = requestAnimationFrame(render)
 
     return () => {
+      io.disconnect()
       if (animRef.current) cancelAnimationFrame(animRef.current)
     }
   }, [loaded, width, height])
